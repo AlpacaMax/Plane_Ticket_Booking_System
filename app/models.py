@@ -1,5 +1,14 @@
+import datetime
 from app import db, login_manager
 from flask_login import UserMixin
+
+@login_manager.user_loader
+def load_user(user_id):
+    result = Staff.query.get(user_id)
+    if (result is None):
+        return Customer.query.get(user_id)
+    else:
+        return result
 
 class Airline(db.Model):
     name = db.Column(db.String(20), primary_key=True)

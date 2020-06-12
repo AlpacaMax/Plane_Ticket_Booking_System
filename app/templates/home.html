@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Ticket Booking</title>
+</head>
+<body>
+    {% for flight in flights %}
+        <div>
+            <h2>
+                {{ flight.depart_airport }}
+                <small>{{ flight.depart_datetime.strftime("%H:%M") }}</small>
+                <small>-></small>
+                {{ flight.arrival_airport }}
+                <small>{{ flight.arrival_datetime.strftime("%H:%M") }}</small>
+            </h2>
+            <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span>
+        </div>
+        <hr>
+    {% endfor %}
+</body>
+</html>
