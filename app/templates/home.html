@@ -9,8 +9,44 @@
     <title>Ticket Booking</title>
 </head>
 <body>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-warning">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form>
+        <label style="font-weight:bold">Filter by: </label>
+        {{ form.source_city_airport.label() }}
+        {{ form.source_city_airport() }}
+
+        {{ form.dest_city_airport.label() }}
+        {{ form.dest_city_airport() }}
+
+        {{ form.gonna_filter_date.label() }}
+        {{ form.gonna_filter_date() }}
+
+        {{ form.depart_date.label() }}
+        {{ form.depart_date(type="date") }}
+
+        {{ form.submit() }}
+    </form>
+    <hr>
+
+    {% if not flights %}
+    <div class="alert alert-warning">
+        <span style="font-style:italic;font-weight:lighter;">
+            No flight matches your filter options!
+        </span>
+    </div>
+    {% endif %}
+
     {% for flight in flights %}
         <div>
+            <span style="font-weight:lighter">{{ flight.depart_datetime.strftime("%m/%d/%Y") }}</span><br>
             <h2>
                 {{ flight.depart_airport }}
                 <small>{{ flight.depart_datetime.strftime("%H:%M") }}</small>
@@ -18,7 +54,8 @@
                 {{ flight.arrival_airport }}
                 <small>{{ flight.arrival_datetime.strftime("%H:%M") }}</small>
             </h2>
-            <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span>
+            <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span><br>
+            <span style="color:gray">{{ flight.status }}</span>
         </div>
         <hr>
     {% endfor %}

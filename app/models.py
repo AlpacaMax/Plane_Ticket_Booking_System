@@ -16,11 +16,9 @@ class Airline(db.Model):
     staffs = db.relationship("Staff", backref="airline", lazy=True)
 
 class Airport(db.Model):
-    name = db.Column(db.String(20),
-                     primary_key=True)
+    name = db.Column(db.String(20), primary_key=True)
 
-    city = db.Column(db.String(20),
-                     nullable=False)
+    city = db.Column(db.String(20), nullable=False)
 
     departing_flights = db.relationship("Flight",
                                         lazy=True,
@@ -31,15 +29,13 @@ class Airport(db.Model):
                                        primaryjoin="Airport.name==Flight.arrival_airport")
 
 class Airplane(db.Model):
-    id = db.Column(db.String(5),
-                   primary_key=True)
+    id = db.Column(db.String(5), primary_key=True)
 
     airline_name = db.Column(db.String(20), 
                              db.ForeignKey("airline.name"), 
                              primary_key=True)
 
-    num_seat = db.Column(db.Integer, 
-                         nullable=False)
+    num_seat = db.Column(db.Integer, nullable=False)
 
     flights = db.relationship("Flight", 
                               backref="airplane", 
@@ -48,11 +44,9 @@ class Airplane(db.Model):
                                             Airplane.airline_name==Flight.airline_name)''')
 
 class Flight(db.Model):
-    flight_num = db.Column(db.String(5), 
-                           primary_key=True)
+    flight_num = db.Column(db.String(5), primary_key=True)
 
-    depart_datetime = db.Column(db.DateTime, 
-                                primary_key=True)
+    depart_datetime = db.Column(db.DateTime, primary_key=True)
 
     airline_name = db.Column(db.String(20), 
                              db.ForeignKey("airplane.airline_name"), 
@@ -62,22 +56,19 @@ class Flight(db.Model):
                                db.ForeignKey("airport.name"), 
                                nullable=False)
 
-    arrival_datetime = db.Column(db.DateTime, 
-                                 nullable=False)
+    arrival_datetime = db.Column(db.DateTime, nullable=False)
 
     arrival_airport = db.Column(db.String(20), 
                                 db.ForeignKey("airport.name"), 
                                 nullable=False)
 
-    base_price = db.Column(db.Integer, 
-                           nullable=False)
+    base_price = db.Column(db.Integer, nullable=False)
 
     airplane_id = db.Column(db.String(5), 
                             db.ForeignKey("airplane.id"), 
                             nullable=False)
 
-    status = db.Column(db.String(10), 
-                       nullable=False)
+    status = db.Column(db.String(10), nullable=False)
 
     tickets = db.relationship("Ticket", 
                               backref="flight", 
@@ -87,49 +78,34 @@ class Flight(db.Model):
                                             Flight.airline_name==Ticket.airline_name)''')
 
 class Customer(db.Model, UserMixin):
-    email = db.Column(db.String(120), 
-                      primary_key=True)
+    email = db.Column(db.String(120), primary_key=True)
 
-    password = db.Column(db.String(60), 
-                         nullable=False)
+    password = db.Column(db.String(60), nullable=False)
 
-    name = db.Column(db.String(100), 
-                     nullable=False)
+    name = db.Column(db.String(100), nullable=False)
 
-    building = db.Column(db.String(20), 
-                         nullable=False)
+    building = db.Column(db.String(20), nullable=False)
 
-    street = db.Column(db.String(20), 
-                       nullable=False)
+    street = db.Column(db.String(20), nullable=False)
 
-    city = db.Column(db.String(20), 
-                     nullable=False)
+    city = db.Column(db.String(20), nullable=False)
 
-    state = db.Column(db.String(20), 
-                      nullable=False)
+    state = db.Column(db.String(20), nullable=False)
 
-    phone = db.Column(db.String(20), 
-                      nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
 
-    passport_number = db.Column(db.String(20),
-                                nullable=False)
+    passport_number = db.Column(db.String(20),nullable=False)
 
-    passport_expire = db.Column(db.Date, 
-                                nullable=False)
+    passport_expire = db.Column(db.Date, nullable=False)
 
-    passport_country = db.Column(db.String(20), 
-                                 nullable=False)
+    passport_country = db.Column(db.String(20), nullable=False)
 
-    date_of_birth = db.Column(db.Date, 
-                              nullable=False)
+    date_of_birth = db.Column(db.Date, nullable=False)
 
-    tickets = db.relationship("Ticket", 
-                              backref="customer", 
-                              lazy=True)
+    tickets = db.relationship("Ticket", backref="customer", lazy=True)
 
 class Ticket(db.Model):
-    id = db.Column(db.String(12),
-                   primary_key=True)
+    id = db.Column(db.String(12), primary_key=True)
 
     flight_num = db.Column(db.String(5), 
                            db.ForeignKey("flight.flight_num"), 
@@ -147,56 +123,41 @@ class Ticket(db.Model):
                                db.ForeignKey("customer.email"), 
                                nullable=False)
 
-    price = db.Column(db.Integer, 
-                      nullable=False)
+    price = db.Column(db.Integer, nullable=False)
 
-    card_type = db.Column(db.String(20),
-                          nullable=False)
+    card_type = db.Column(db.String(20), nullable=False)
 
-    card_number = db.Column(db.String(20), 
-                            nullable=False)
+    card_number = db.Column(db.String(20), nullable=False)
 
-    first_name = db.Column(db.String(20), 
-                           nullable=False)
+    first_name = db.Column(db.String(20), nullable=False)
 
-    last_name = db.Column(db.String(20), 
-                          nullable=False)
+    last_name = db.Column(db.String(20), nullable=False)
 
-    expire_date = db.Column(db.Date, 
-                            nullable=False)
+    expire_date = db.Column(db.Date, nullable=False)
 
-    purchase_datetime = db.Column(db.DateTime, 
-                                  nullable=False)
+    purchase_datetime = db.Column(db.DateTime, nullable=False)
 
 class Staff(db.Model, UserMixin):
-    username = db.Column(db.String(20), 
-                         primary_key=True)
+    username = db.Column(db.String(20), primary_key=True)
 
-    password = db.Column(db.String(60), 
-                         nullable=False)
+    password = db.Column(db.String(60), nullable=False)
 
-    first_name = db.Column(db.String(20), 
-                           nullable=False)
+    first_name = db.Column(db.String(20), nullable=False)
 
-    last_name = db.Column(db.String(20), 
-                          nullable=False)
+    last_name = db.Column(db.String(20), nullable=False)
 
-    date_of_birth = db.Column(db.Date, 
-                              nullable=False)
+    date_of_birth = db.Column(db.Date, nullable=False)
 
     airline_name = db.Column(db.String(20), 
                              db.ForeignKey("airline.name"), 
                              nullable=False)
 
-    phones = db.relationship("Phone", 
-                             backref="staff", 
-                             lazy=True)
+    phones = db.relationship("Phone", backref="staff", lazy=True)
 
 class Phone(db.Model):
     username = db.Column(db.String(20), 
                          db.ForeignKey("staff.username"), 
                          primary_key=True)
 
-    number = db.Column(db.String(20), 
-                       primary_key=True)
+    number = db.Column(db.String(20), primary_key=True)
 
