@@ -1,0 +1,9 @@
+<a href="{{ url_for('view_selected_flights', 
+                    depart_flight_num=depart_flight_num, 
+                    depart_datetime=depart_datetime, 
+                    depart_airline_name=depart_airline_name,
+                    return_flight_num=flight.flight_num,
+                    return_datetime=flight.depart_datetime,
+                    return_airline_name=flight.airline_name) }}">
+    Select
+</a>

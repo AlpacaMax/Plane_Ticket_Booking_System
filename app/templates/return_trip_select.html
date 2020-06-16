@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h3>Select a return flight</h3>
+    <a href="{{ url_for('view_selected_flights',
+                        depart_flight_num=depart_flight_num,
+                        depart_datetime=depart_datetime,
+                        depart_airline_name=depart_airline_name) }}">
+        I don't need to book a return flight
+    </a>
+    {% include "flight_list.html" %}
+{% endblock content %}

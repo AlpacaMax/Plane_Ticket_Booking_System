@@ -1,0 +1,17 @@
+<form>
+    <label style="font-weight:bold">Filter by: </label>
+    {{ form.source_city_airport.label() }}
+    {{ form.source_city_airport() }}
+
+    {{ form.dest_city_airport.label() }}
+    {{ form.dest_city_airport() }}
+
+    {{ form.gonna_filter_date.label() }}
+    {{ form.gonna_filter_date() }}
+
+    {{ form.depart_date.label() }}
+    {{ form.depart_date(type="date") }}
+
+    {{ form.submit() }}
+</form>
+<hr>
