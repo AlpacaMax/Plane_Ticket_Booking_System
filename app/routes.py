@@ -4,7 +4,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -135,7 +135,6 @@ def login():
             and hashlib.md5(form.password.data.encode()).hexdigest() == user.password):
             login_user(user, remember = form.remember.data)
             next_page = request.args.get('next')
-            print('Success!')
             return redirect(next_page) if next_page else redirect(url_for("home"))
         else:
             flash("Login Unsuccessful. Please check username and password")
@@ -148,3 +147,38 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route("/customerRegister", methods=["GET", "POST"])
+def customer_register():
+    if (current_user.is_authenticated):
+        return redirect(url_for("home"))
+
+    form = CustomerRegisterForm()
+    if (form.validate_on_submit()):
+        if (form.email_exist()):
+            flash("That email has been registered. Please choose a different one")
+        else:
+            hashed_password = hashlib.md5(form.password.data.encode()).hexdigest()
+            customer = Customer(
+                email = form.email.data,
+                password = hashed_password,
+                name = form.name.data,
+                building = form.building.data,
+                street = form.street.data,
+                city = form.city.data,
+                state = form.state.data,
+                phone = form.phone.data,
+                passport_number = form.passport_number.data,
+                passport_expire = form.passport_expire.data,
+                passport_country = form.passport_country.data,
+                date_of_birth = form.date_of_birth.data
+            )
+            db.session.add(customer)
+            db.session.commit()
+            flash("Your account has been created! You are now able to log in")
+            return redirect(url_for("login"))
+
+    return render_template("customer_register.html", form=form)
+
+@app.route("/staffRegister", methods=["GET", "POST"])
+def staff_register():
+    return "Staff Register"

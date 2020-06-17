@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h3>Register as Customer</h3>
+    <a href="{{ url_for('staff_register') }}">Register as staff</a>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {{ form.email.label() }}:
+        {{ form.email() }}<br>
+        {{ form.password.label() }}:
+        {{ form.password() }}<br>
+        {{ form.confirm_password.label() }}:
+        {{ form.confirm_password() }}<br>
+        {{ form.name.label() }}:
+        {{ form.name() }}<br>
+        <hr>
+        <label style="font-weight: bold;">Address:</label><br>
+        {{ form.building.label() }}:
+        {{ form.building() }}<br>
+        {{ form.street.label() }}:
+        {{ form.street() }}<br>
+        {{ form.city.label() }}:
+        {{ form.city() }}<br>
+        {{ form.state.label() }}:
+        {{ form.state() }}<br>
+        {{ form.phone.label() }}:
+        {{ form.phone() }}<br>
+        <hr>
+        <label style="font-weight: bold;">Passport:</label><br>
+        {{ form.passport_number.label() }}:
+        {{ form.passport_number() }}<br>
+        {{ form.passport_expire.label() }}:
+        {{ form.passport_expire(type="date") }}<br>
+        {{ form.passport_country.label() }}:
+        {{ form.passport_country() }}<br>
+        {{ form.date_of_birth.label() }}:
+        {{ form.date_of_birth(type="date") }}<br>
+        {{ form.submit() }}
+    </form>
+{% endblock %}
