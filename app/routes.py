@@ -1,10 +1,12 @@
+import hashlib
 import datetime
 from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm
+from app.forms import FilterForm, LoginForm
 from sqlalchemy.orm import aliased
+from flask_login import login_user, current_user, logout_user, login_required
 
 def filter_form_processor(form, flights):
     if (form.same_airports()):
@@ -114,3 +116,35 @@ def return_trip_choosing():
 @app.route("/summary_of_trip", methods=["GET"])
 def view_selected_flights():
     return request.args
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if (current_user.is_authenticated):
+        return redirect(url_for("home"))
+    form = LoginForm()
+
+    if (form.validate_on_submit()):
+        user = None
+        
+        if (escape(form.identity.data) == "staff"):
+            user = Staff.query.filter_by(username=form.username.data).first()
+        else:
+            user = Customer.query.filter_by(email=form.username.data).first()
+        
+        if (user
+            and hashlib.md5(form.password.data.encode()).hexdigest() == user.password):
+            login_user(user, remember = form.remember.data)
+            next_page = request.args.get('next')
+            print('Success!')
+            return redirect(next_page) if next_page else redirect(url_for("home"))
+        else:
+            flash("Login Unsuccessful. Please check username and password")
+
+    return render_template("login.html", form=form)
+
+@app.route("/logout", methods=["GET"])
+def logout():
+    flash("You are logged out")
+    logout_user()
+    return redirect(url_for('home'))
+

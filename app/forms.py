@@ -1,7 +1,7 @@
 import datetime
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, DateField, BooleanField
-from wtforms.validators import DataRequired, ValidationError
+from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField
+from wtforms.validators import DataRequired, ValidationError, Length
 
 def diff_data(another_field):
     def _diff_data(form, field):
@@ -41,3 +41,15 @@ class FilterForm(FlaskForm):
             return False
         else:
             return True
+
+class LoginForm(FlaskForm):
+    username = StringField("Username: ",
+                           validators=[DataRequired()])
+    password = PasswordField("Password: ", validators=[DataRequired()])
+    identity = SelectField("Sign in as ",
+                           choices=[
+                               ("customer", "Customer"),
+                               ("staff", "Staff")
+                           ])
+    remember = BooleanField("Remember Me")
+    submit = SubmitField("Login")

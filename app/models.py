@@ -104,6 +104,9 @@ class Customer(db.Model, UserMixin):
 
     tickets = db.relationship("Ticket", backref="customer", lazy=True)
 
+    def get_id(self):
+        return self.email
+
 class Ticket(db.Model):
     id = db.Column(db.String(12), primary_key=True)
 
@@ -153,6 +156,9 @@ class Staff(db.Model, UserMixin):
                              nullable=False)
 
     phones = db.relationship("Phone", backref="staff", lazy=True)
+
+    def get_id(self):
+        return self.username
 
 class Phone(db.Model):
     username = db.Column(db.String(20), 

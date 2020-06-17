@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {{ form.username.label() }}
+    {{ form.username() }}<br>
+    {{ form.password.label() }}
+    {{ form.password() }}<br>
+    {{ form.identity.label() }}
+    {{ form.identity() }}<br>
+    {{ form.remember.label() }}
+    {{ form.remember() }}<br>
+    {{ form.submit() }}
+</form>
+{% endblock content %}
