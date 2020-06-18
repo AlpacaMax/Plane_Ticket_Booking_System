@@ -61,9 +61,12 @@ class RegisterForm(FlaskForm):
                                      validators=[DataRequired(), EqualTo("password")])
     submit = SubmitField("Sign Up")
 
-class CustomerRegisterForm(RegisterForm):
+class CustomerRegisterForm(FlaskForm):
     email = StringField("Email",
                         validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField("Confirm Password",
+                                     validators=[DataRequired(), EqualTo("password")])
     name = StringField("Name",
                        validators=[DataRequired()])
     building = StringField("Building",
@@ -84,12 +87,14 @@ class CustomerRegisterForm(RegisterForm):
                                   validators=[DataRequired()])
     date_of_birth = DateField("Date of Birth",
                                   validators=[DataRequired()])
+    submit = SubmitField("Sign Up")
     
-    def email_exist(self):
-        customer = Customer.query.filter_by(email=self.email.data).first()
+    def validate_email(self, email):
+        # print("TEST")
+        customer = Customer.query.filter_by(email=email.data).first()
         if (customer):
-            return True
-        return False
+            # print("EXIST")
+            raise ValidationError("That email is taken. Please choose a different one.")
 
 class StaffRegisterForm(RegisterForm):
     username = StringField("Username",

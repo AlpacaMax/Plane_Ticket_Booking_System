@@ -7,34 +7,125 @@
         {{ form.hidden_tag() }}
         {{ form.email.label() }}:
         {{ form.email() }}<br>
+        {% if form.email.errors %}
+            <div class="text-danger">
+                {% for error in form.email.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.password.label() }}:
         {{ form.password() }}<br>
+        {% if form.password.errors %}
+            <div class="text-danger">
+                {% for error in form.password.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.confirm_password.label() }}:
         {{ form.confirm_password() }}<br>
+        {% if form.confirm_password.errors %}
+            <div class="text-danger">
+                {% for error in form.confirm_password.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.name.label() }}:
         {{ form.name() }}<br>
+        {% if form.name.errors %}
+            <div class="text-danger">
+                {% for error in form.name.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         <hr>
         <label style="font-weight: bold;">Address:</label><br>
         {{ form.building.label() }}:
         {{ form.building() }}<br>
+        {% if form.building.errors %}
+            <div class="text-danger">
+                {% for error in form.building.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.street.label() }}:
         {{ form.street() }}<br>
+        {% if form.street.errors %}
+            <div class="text-danger">
+                {% for error in form.street.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.city.label() }}:
         {{ form.city() }}<br>
+        {% if form.city.errors %}
+            <div class="text-danger">
+                {% for error in form.city.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.state.label() }}:
         {{ form.state() }}<br>
+        {% if form.state.errors %}
+            <div class="text-danger">
+                {% for error in form.state.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.phone.label() }}:
         {{ form.phone() }}<br>
+        {% if form.phone.errors %}
+            <div class="text-danger">
+                {% for error in form.phone.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         <hr>
         <label style="font-weight: bold;">Passport:</label><br>
         {{ form.passport_number.label() }}:
         {{ form.passport_number() }}<br>
+        {% if form.passport_number.errors %}
+            <div class="text-danger">
+                {% for error in form.passport.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.passport_expire.label() }}:
         {{ form.passport_expire(type="date") }}<br>
+        {% if form.passport_expire.errors %}
+            <div class="text-danger">
+                {% for error in form.passport_expire.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.passport_country.label() }}:
         {{ form.passport_country() }}<br>
+        {% if form.passport_country.errors %}
+            <div class="text-danger">
+                {% for error in form.passport_country.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.date_of_birth.label() }}:
         {{ form.date_of_birth(type="date") }}<br>
+        {% if form.date_of_birth.errors %}
+            <div class="text-danger">
+                {% for error in form.date_of_birth.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.submit() }}
     </form>
 {% endblock %}

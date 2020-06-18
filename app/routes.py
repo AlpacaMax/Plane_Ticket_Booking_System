@@ -154,28 +154,25 @@ def customer_register():
 
     form = CustomerRegisterForm()
     if (form.validate_on_submit()):
-        if (form.email_exist()):
-            flash("That email has been registered. Please choose a different one")
-        else:
-            hashed_password = hashlib.md5(form.password.data.encode()).hexdigest()
-            customer = Customer(
-                email = form.email.data,
-                password = hashed_password,
-                name = form.name.data,
-                building = form.building.data,
-                street = form.street.data,
-                city = form.city.data,
-                state = form.state.data,
-                phone = form.phone.data,
-                passport_number = form.passport_number.data,
-                passport_expire = form.passport_expire.data,
-                passport_country = form.passport_country.data,
-                date_of_birth = form.date_of_birth.data
-            )
-            db.session.add(customer)
-            db.session.commit()
-            flash("Your account has been created! You are now able to log in")
-            return redirect(url_for("login"))
+        hashed_password = hashlib.md5(form.password.data.encode()).hexdigest()
+        customer = Customer(
+            email = form.email.data,
+            password = hashed_password,
+            name = form.name.data,
+            building = form.building.data,
+            street = form.street.data,
+            city = form.city.data,
+            state = form.state.data,
+            phone = form.phone.data,
+            passport_number = form.passport_number.data,
+            passport_expire = form.passport_expire.data,
+            passport_country = form.passport_country.data,
+            date_of_birth = form.date_of_birth.data
+        )
+        db.session.add(customer)
+        db.session.commit()
+        flash("Your account has been created! You are now able to log in")
+        return redirect(url_for("login"))
 
     return render_template("customer_register.html", form=form)
 
