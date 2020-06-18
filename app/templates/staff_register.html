@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h3>Register as Staff</h3>
+    <a href="{{ url_for('customer_register') }}">Register as customer</a>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {{ form.username.label() }}:
+        {{ form.username() }}<br>
+        {% if form.username.errors %}
+            <div class="text-danger">
+                {% for error in form.username.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.password.label() }}:
+        {{ form.password() }}<br>
+        {% if form.password.errors %}
+            <div class="text-danger">
+                {% for error in form.password.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.confirm_password.label() }}:
+        {{ form.confirm_password() }}<br>
+        {% if form.confirm_password.errors %}
+            <div class="text-danger">
+                {% for error in form.confirm_password.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.first_name.label() }}:
+        {{ form.first_name() }}<br>
+        {% if form.first_name.errors %}
+            <div class="text-danger">
+                {% for error in form.first_name.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.last_name.label() }}:
+        {{ form.last_name() }}<br>
+        {% if form.last_name.errors %}
+            <div class="text-danger">
+                {% for error in form.last_name.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.date_of_birth.label() }}:
+        {{ form.date_of_birth(type="date") }}<br>
+        {% if form.date_of_birth.errors %}
+            <div class="text-danger">
+                {% for error in form.date_of_birth.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.airline_name.label() }}:
+        {{ form.airline_name() }}<br>
+        {% if form.airline_name.errors %}
+            <div class="text-danger">
+                {% for error in form.airline_name.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.phone.label() }}:
+        {{ form.phone() }}<br>
+        {% if form.phone.errors %}
+            <div class="text-danger">
+                {% for error in form.phone.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.submit() }}
+    </form>
+{% endblock %}

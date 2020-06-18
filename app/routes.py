@@ -178,4 +178,28 @@ def customer_register():
 
 @app.route("/staffRegister", methods=["GET", "POST"])
 def staff_register():
-    return "Staff Register"
+    if (current_user.is_authenticated):
+        return redirect(url_for("home"))
+    
+    form = StaffRegisterForm()
+    if (form.validate_on_submit()):
+        hashed_password = hashlib.md5(form.password.data.encode()).hexdigest()
+        staff = Staff(
+            username = form.username.data,
+            password = hashed_password,
+            first_name = form.first_name.data,
+            last_name = form.last_name.data,
+            date_of_birth = form.date_of_birth.data,
+            airline_name = form.airline_name.data
+        )
+        phone = Phone(
+            username = form.username.data,
+            number = form.phone.data
+        )
+        db.session.add(staff)
+        db.session.add(phone)
+        db.session.commit()
+        flash("Your account has been created! You are now able to log in")
+        return redirect(url_for("login"))
+
+    return render_template("staff_register.html", form=form)

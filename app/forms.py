@@ -1,8 +1,8 @@
 import datetime
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField
-from wtforms.validators import DataRequired, ValidationError, Length, EqualTo, Email
-from app.models import Customer, Staff
+from wtforms.validators import DataRequired, ValidationError, Length, EqualTo, Email, NumberRange, Regexp
+from app.models import Customer, Staff, Airline
 
 def diff_data(another_field):
     def _diff_data(form, field):
@@ -90,18 +90,32 @@ class CustomerRegisterForm(FlaskForm):
     submit = SubmitField("Sign Up")
     
     def validate_email(self, email):
-        # print("TEST")
         customer = Customer.query.filter_by(email=email.data).first()
         if (customer):
-            # print("EXIST")
             raise ValidationError("That email is taken. Please choose a different one.")
 
-class StaffRegisterForm(RegisterForm):
+class StaffRegisterForm(FlaskForm):
     username = StringField("Username",
                            validators=[DataRequired(), Length(min=2, max=20)])
+    password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField("Confirm Password",
+                                     validators=[DataRequired(), EqualTo("password")])
+    first_name = StringField("First name",
+                             validators=[DataRequired()])
+    last_name = StringField("Last name",
+                             validators=[DataRequired()])
+    date_of_birth = DateField("Date of Birth",
+                              validators=[DataRequired()])
+    airline_name = SelectField("Airline name", choices=[
+        (airline.name, airline.name) for airline in Airline.query.all()
+    ])
+    phone = StringField("Phone",
+                        validators=[DataRequired(),
+                                    Regexp('[0-9]',
+                                           message="Only digits are allowed")])
+    submit = SubmitField("Sign Up")
 
-    def validate_username(self):
+    def validate_username(self, username):
         staff = Staff.query.filter_by(username=self.username.data).first()
         if (staff):
-            return False
-        return True
+            raise ValidationError("That username is taken. Please choose another one")
