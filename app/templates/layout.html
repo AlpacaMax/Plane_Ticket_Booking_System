@@ -25,7 +25,7 @@
         </li>
         {% if current_user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link" href="#">{{ current_user.get_id() }}</a>
+                <a class="nav-link" href="{{ url_for('customer_future_flights') }}">{{ current_user.get_id() }}</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>

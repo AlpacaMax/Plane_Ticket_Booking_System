@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Welcome! {{ current_user.name }}</h1>
+
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('customer_future_flights') }}"">Future Trips</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('customer_past_flights') }}">Past Trips</a>
+        </li>
+    </ul>
+
+    {% block home_content %}{% endblock %}
+{% endblock content %}

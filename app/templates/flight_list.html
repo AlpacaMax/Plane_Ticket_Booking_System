@@ -16,6 +16,9 @@
             {{ flight.arrival_airport }}
             <small>{{ flight.arrival_datetime.strftime("%H:%M") }}</small>
         </h2>
+        <h4 style="font-weight: bold;">
+            ${{ flight.base_price }}
+        </h3>
         <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span><br>
         <span style="color:gray">{{ flight.status }}</span><br>
 

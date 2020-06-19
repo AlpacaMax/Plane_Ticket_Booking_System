@@ -203,3 +203,44 @@ def staff_register():
         return redirect(url_for("login"))
 
     return render_template("staff_register.html", form=form)
+
+@app.route("/customerFutureFlights", methods=["GET"])
+@login_required
+def customer_future_flights():
+    if (current_user.get_user_type() == "Staff"):
+        return redirect(url_for("staff_future_flights"))
+
+    all_tickets = Ticket.query.filter(
+        Ticket.customer_email==current_user.email,
+        Ticket.depart_datetime > datetime.datetime.now()
+    ).all()
+    flights = [ticket.flight for ticket in all_tickets]
+
+    return render_template("customer_future_flights.html", flights=flights)
+
+@app.route("/customerPastFlights", methods=["GET"])
+@login_required
+def customer_past_flights():
+    if (current_user.get_user_type() == "Staff"):
+        return redirect(url_for("staff_past_flights"))
+
+    all_tickets = Ticket.query.filter(
+        Ticket.customer_email==current_user.email,
+        Ticket.depart_datetime <= datetime.datetime.now()
+    ).all()
+    flights = [ticket.flight for ticket in all_tickets]
+
+    return render_template("customer_past_flights.html", flights=flights)
+
+@app.route("/staffFutureFlights", methods=["GET"])
+@login_required
+def staff_future_flights():
+    if (current_user.get_user_type() == "Customer"):
+        return redirect(url_for("customer_future_flights"))
+        
+    return "Staff Home"
+
+@app.route("/staffPastFlights", methods=["GET"])
+@login_required
+def staff_past_flights():
+    return "Staff Past Flights"

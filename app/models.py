@@ -106,6 +106,9 @@ class Customer(db.Model, UserMixin):
 
     def get_id(self):
         return self.email
+    
+    def get_user_type(self):
+        return "Customer"
 
 class Ticket(db.Model):
     id = db.Column(db.String(12), primary_key=True)
@@ -159,6 +162,9 @@ class Staff(db.Model, UserMixin):
 
     def get_id(self):
         return self.username
+    
+    def get_user_type(self):
+        return "Staff"
 
 class Phone(db.Model):
     username = db.Column(db.String(20), 

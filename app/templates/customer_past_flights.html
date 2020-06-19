@@ -1,0 +1,29 @@
+{% extends "customer_layout.html" %}
+
+{% block home_content %}
+    {% if not flights %}
+    <div class="alert alert-warning">
+        <span style="font-style:italic;font-weight:lighter;">
+            No flights to view here
+        </span>
+    </div>
+    {% endif %}
+    
+    <hr>
+
+    {% for flight in flights %}
+        <div>
+            <span style="font-weight:lighter">{{ flight.depart_datetime.strftime("%m/%d/%Y") }}</span><br>
+            <h2>
+                {{ flight.depart_airport }}
+                <small>{{ flight.depart_datetime.strftime("%H:%M") }}</small>
+                <small>-></small>
+                {{ flight.arrival_airport }}
+                <small>{{ flight.arrival_datetime.strftime("%H:%M") }}</small>
+            </h2>
+            <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span><br>
+            <span style="color:gray">{{ flight.status }}</span><br>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}
