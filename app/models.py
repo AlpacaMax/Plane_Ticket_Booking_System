@@ -77,6 +77,15 @@ class Flight(db.Model):
                                             Flight.depart_datetime==Ticket.depart_datetime,
                                             Flight.airline_name==Ticket.airline_name)''')
 
+    def get_num_tickets(self):
+        return len(self.tickets)
+
+    def get_current_price(self):
+        if (self.get_num_tickets() / self.airplane.num_seat > 0.7):
+            return round(self.base_price * 1.2, 2)
+        else:
+            return self.base_price
+
 class Customer(db.Model, UserMixin):
     email = db.Column(db.String(120), primary_key=True)
 
@@ -111,7 +120,7 @@ class Customer(db.Model, UserMixin):
         return "Customer"
 
 class Ticket(db.Model):
-    id = db.Column(db.String(12), primary_key=True)
+    id = db.Column(db.String(60), primary_key=True)
 
     flight_num = db.Column(db.String(5), 
                            db.ForeignKey("flight.flight_num"), 
@@ -142,6 +151,10 @@ class Ticket(db.Model):
     expire_date = db.Column(db.Date, nullable=False)
 
     purchase_datetime = db.Column(db.DateTime, nullable=False)
+
+    rating = db.Column(db.Integer)
+
+    comment = db.Column(db.Text)
 
 class Staff(db.Model, UserMixin):
     username = db.Column(db.String(20), primary_key=True)

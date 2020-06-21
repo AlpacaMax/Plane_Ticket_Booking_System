@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <hr>
+    <div>
+        <span style="font-weight:lighter">{{ depart_flight.depart_datetime.strftime("%m/%d/%Y") }}</span><br>
+        <h2>
+            {{ depart_flight.depart_airport }}
+            <small>{{ depart_flight.depart_datetime.strftime("%H:%M") }}</small>
+            <small>-></small>
+            {{ depart_flight.arrival_airport }}
+            <small>{{ depart_flight.arrival_datetime.strftime("%H:%M") }}</small>
+        </h2>
+        <h4 style="font-weight: bold;">
+            ${{ depart_flight.get_current_price() }}
+        </h4>
+        <span>Capacity: <span stype="font-weight:lighter">{{ depart_flight.get_num_tickets() }}/{{ depart_flight.airplane.num_seat }}</span></span><br>
+        <span>{{ depart_flight.airline_name }} {{ depart_flight.airplane_id }}</span><br>
+        <span style="color:gray">{{ depart_flight.status }}</span><br>
+    </div>
+    <hr>
+    {% if return_flight %}
+        <div>
+            <span style="font-weight:lighter">{{ return_flight.depart_datetime.strftime("%m/%d/%Y") }}</span><br>
+            <h2>
+                {{ return_flight.depart_airport }}
+                <small>{{ return_flight.depart_datetime.strftime("%H:%M") }}</small>
+                <small>-></small>
+                {{ return_flight.arrival_airport }}
+                <small>{{ return_flight.arrival_datetime.strftime("%H:%M") }}</small>
+            </h2>
+            <h4 style="font-weight: bold;">
+                ${{ return_flight.get_current_price() }}
+            </h4>
+            <span>Capacity: <span stype="font-weight:lighter">{{ return_flight.get_num_tickets() }}/{{ return_flight.airplane.num_seat }}</span></span><br>
+            <span>{{ return_flight.airline_name }} {{ return_flight.airplane_id }}</span><br>
+            <span style="color:gray">{{ return_flight.status }}</span><br>
+        </div>
+        <hr>
+    {% endif %}
+    {% if current_user.is_authenticated %}
+        <form method='POST' action="">
+            {{ form.hidden_tag() }}
+            {{ form.card_type.label() }}:
+            {{ form.card_type() }}<br>
+            {% if form.card_type.errors %}
+                <div class="text-danger">
+                    {% for error in form.card_type.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {{ form.card_number.label() }}:
+            {{ form.card_number() }}<br>
+            {% if form.card_number.errors %}
+                <div class="text-danger">
+                    {% for error in form.card_number.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {{ form.cvv.label() }}:
+            {{ form.cvv() }}<br>
+            {% if form.cvv.errors %}
+                <div class="text-danger">
+                    {% for error in form.cvv.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {{ form.first_name.label() }}:
+            {{ form.first_name() }}<br>
+            {% if form.first_name.errors %}
+                <div class="text-danger">
+                    {% for error in form.first_name.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {{ form.last_name.label() }}:
+            {{ form.last_name() }}<br>
+            {% if form.last_name.errors %}
+                <div class="text-danger">
+                    {% for error in form.last_name.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {{ form.expire_date.label() }}:
+            {{ form.expire_date(type="date") }}<br>
+            {% if form.expire_date.errors %}
+                <div class="text-danger">
+                    {% for error in form.expire_date.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {{ form.submit() }}
+        </form>
+    {% else %}
+        <h3>Please <a href="{{ url_for('login') }}">login</a> as a customer to purchase tickets</h3>
+    {% endif %}
+
+{% endblock %}

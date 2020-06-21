@@ -1,6 +1,6 @@
 import datetime
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField
+from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField, HiddenField
 from wtforms.validators import DataRequired, ValidationError, Length, EqualTo, Email, NumberRange, Regexp
 from app.models import Customer, Staff, Airline
 
@@ -119,3 +119,30 @@ class StaffRegisterForm(FlaskForm):
         staff = Staff.query.filter_by(username=self.username.data).first()
         if (staff):
             raise ValidationError("That username is taken. Please choose another one")
+
+class PurchaseForm(FlaskForm):
+    # depart_flight_num = HiddenField()
+    # depart_datetime = HiddenField()
+    # depart_airline_name = HiddenField()
+    # return_flight_num = HiddenField()
+    # return_datetime = HiddenField()
+    # return_airline_name = HiddenField()
+    card_type = SelectField("Card Type", 
+                            choices=[("Credit", "Credit Card"), ("Debit", "Debit Card")])
+    card_number = StringField("Card Number",
+                              validators=[DataRequired(), 
+                                          Length(16,16,"Please enter a valid card number"),
+                                          Regexp('[0-9]',
+                                                message="Please enter a valid card number")])
+    cvv = StringField("CVV",
+                      validators=[DataRequired(),
+                                  Length(3,3,"Please enter a valid cvv code"),
+                                  Regexp('[0-9]',
+                                         message="Please enter a valid cvv code")])
+    first_name = StringField("First Name",
+                             validators=[DataRequired()])
+    last_name = StringField("Last Name",
+                            validators=[DataRequired()])
+    expire_date = DateField("Expire Date",
+                            validators=[DataRequired()])
+    submit = SubmitField("Buy")

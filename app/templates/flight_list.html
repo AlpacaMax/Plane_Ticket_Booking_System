@@ -17,8 +17,9 @@
             <small>{{ flight.arrival_datetime.strftime("%H:%M") }}</small>
         </h2>
         <h4 style="font-weight: bold;">
-            ${{ flight.base_price }}
-        </h3>
+            ${{ flight.get_current_price() }}
+        </h4>
+        <span>Capacity: <span stype="font-weight:lighter">{{ flight.get_num_tickets() }}/{{ flight.airplane.num_seat }}</span></span><br>
         <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span><br>
         <span style="color:gray">{{ flight.status }}</span><br>
 

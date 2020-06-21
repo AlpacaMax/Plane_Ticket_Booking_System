@@ -4,7 +4,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -48,8 +48,6 @@ def home():
         Flight.depart_datetime >= datetime.datetime.today()
     ).order_by(Flight.depart_datetime)
 
-    # form.validate()
-
     flights = filter_form_processor(form, flights)
 
     return render_template("home.html", 
@@ -73,26 +71,11 @@ def return_trip_choosing():
         flash(f"Departure flight doesn't exist. Please choose an existing flight.")
         return redirect(url_for("home"))
 
-    # form = FilterForm(request.args)
-
     depart_city = Airport.query.filter(Airport.name == depart_flight.depart_airport).first().city
     arrival_city = Airport.query.filter(Airport.name == depart_flight.arrival_airport).first().city
 
     return_depart_city = arrival_city
     return_arrival_city = depart_city
-
-    # depart_airports = Airport.query.filter_by(city=return_depart_city).all()
-    # arrival_airports = Airport.query.filter_by(city=return_arrival_city).all()
-
-    # depart_airport_choices = [("any", "Any")] + [
-    #     (airport.name, "%s/%s" % (airport.city, airport.name)) for airport in depart_airports
-    # ]
-    # arrival_airport_choices = [("any", "Any")] + [
-    #     (airport.name, "%s/%s" % (airport.city, airport.name)) for airport in arrival_airports
-    # ]
-
-    # form.source_city_airport.choices = depart_airport_choices
-    # form.dest_city_airport.choices = arrival_airport_choices
 
     all_airports_A = aliased(Airport)
     all_airports_B = aliased(Airport)
@@ -104,8 +87,6 @@ def return_trip_choosing():
               filter(all_airports_B.city == return_arrival_city).\
               filter(Flight.depart_datetime > depart_flight.arrival_datetime).all()
 
-    # flights = filter_form_processor(form, flights)
-
     return render_template("return_trip_select.html", 
                            flights = flights, 
                            template_for_select = "select_for_return_trip.html",
@@ -113,9 +94,106 @@ def return_trip_choosing():
                            depart_datetime = depart_datetime,
                            depart_airline_name = depart_airline_name)
 
-@app.route("/summary_of_trip", methods=["GET"])
+@app.route("/summary_of_trip", methods=["GET", "POST"])
 def view_selected_flights():
-    return request.args
+    depart_airline_name = escape(request.args.get("depart_airline_name"))
+    depart_datetime = datetime.datetime.fromisoformat(request.args.get("depart_datetime"))
+    depart_flight_num = escape(request.args.get("depart_flight_num"))
+
+    depart_flight = Flight.query.filter(Flight.airline_name==depart_airline_name,
+                                        Flight.depart_datetime==depart_datetime,
+                                        Flight.flight_num==depart_flight_num).first()
+    
+    form = PurchaseForm()
+    # form.depart_flight_num.data = depart_flight_num
+    # form.depart_datetime.data = depart_datetime
+    # form.depart_airline_name.data = depart_airline_name
+
+    return_flight = None
+    if ("return_airline_name" in request.args
+        and "return_datetime" in request.args
+        and "return_flight_num" in request.args):
+
+        return_airline_name = escape(request.args.get("return_airline_name"))
+        return_datetime = datetime.datetime.fromisoformat(request.args.get("return_datetime"))
+        return_flight_num = escape(request.args.get("return_flight_num"))
+
+        return_flight = Flight.query.filter(Flight.airline_name==return_airline_name,
+                                            Flight.depart_datetime==return_datetime,
+                                            Flight.flight_num==return_flight_num).first()
+
+        if (return_flight is None):
+            flash("Return flight doesn't exist! Please choose a different one")
+            return redirect(url_for(
+                "return_trip_choosing",
+                depart_airline_name = depart_airline_name,
+                depart_datetime = depart_datetime,
+                depart_flight_num = depart_flight_num
+            ))
+    
+    # form.return_flight_num.data = return_flight_num
+    # form.return_datetime.data = return_datetime
+    # form.return_airline_name.data = return_airline_name
+    if (form.validate_on_submit()):
+        if (not current_user.is_authenticated):
+            flash("Please login first!")
+            return redirect(url_for("login"))
+        elif (current_user.get_user_type() == "Staff"):
+            flash("Only customers are allowed to book tickets")
+            return redirect(url_for("home"))
+        
+        depart_ticket_id = hashlib.md5(
+            (depart_airline_name+str(depart_datetime)+depart_flight_num+current_user.get_id()).encode()
+        ).hexdigest()
+
+        depart_ticket = Ticket(
+            id=depart_ticket_id,
+            flight_num=depart_flight_num,
+            depart_datetime=depart_datetime,
+            airline_name=depart_airline_name,
+            customer_email=current_user.get_id(),
+            price=depart_flight.get_current_price(),
+            card_type=form.card_type.data,
+            card_number=form.card_number.data,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            expire_date=form.expire_date.data,
+            purchase_datetime=datetime.datetime.now(),
+            rating=None,
+            comment=None
+        )
+        db.session.add(depart_ticket)
+        
+        if (return_flight):
+            return_ticket_id = hashlib.md5(
+                (return_airline_name+str(return_datetime)+return_flight_num+current_user.get_id()).encode()
+            ).hexdigest()
+            return_ticket = Ticket(
+                id=return_ticket_id,
+                flight_num=return_flight_num,
+                depart_datetime=return_datetime,
+                airline_name=return_airline_name,
+                customer_email=current_user.get_id(),
+                price=return_flight.get_current_price(),
+                card_type=form.card_type.data,
+                card_number=form.card_number.data,
+                first_name=form.first_name.data,
+                last_name=form.last_name.data,
+                expire_date=form.expire_date.data,
+                purchase_datetime=datetime.datetime.now(),
+                rating=None,
+                comment=None
+            )
+            db.session.add(return_ticket)
+        
+        db.session.commit()
+        flash("Successfully purchased!")
+        return redirect(url_for("customer_future_flights"))
+
+    return render_template("customer_purchase.html",
+                           depart_flight=depart_flight,
+                           return_flight=return_flight,
+                           form=form)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
