@@ -4,7 +4,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -322,3 +322,43 @@ def staff_future_flights():
 @login_required
 def staff_past_flights():
     return "Staff Past Flights"
+
+@app.route("/flightComment", methods=["GET", "POST"])
+@login_required
+def flight_comment():
+    if (current_user.get_user_type() == "Staff"):
+        flash("Please login as a customer to comment previous flights")
+        return redirect(url_for("staff_future_flights"))
+
+    form = CommentForm()
+    airline_name = escape(request.args.get("airline_name"))
+    depart_datetime = datetime.datetime.fromisoformat(request.args.get("depart_datetime"))
+    flight_num = escape(request.args.get("flight_num"))
+
+    form.airline_name.data = airline_name
+    form.depart_datetime.data = depart_datetime
+    form.flight_num.data = flight_num
+
+    ticket = Ticket.query.filter(
+        Ticket.airline_name==airline_name,
+        Ticket.depart_datetime==depart_datetime,
+        Ticket.flight_num==flight_num,
+        Ticket.customer_email==current_user.get_id()
+    ).first()
+
+    if (ticket is None):
+        flash("You didn't took this flight before. Please comment a different one")
+        return redirect(url_for("customer_past_flights"))
+
+    if (form.validate_on_submit()):
+        ticket.rating = int(form.rating.data)
+        ticket.comment = form.comment.data
+        db.session.add(ticket)
+        db.session.commit()
+        flash("Thank you for your rating and comment!")
+        return redirect(url_for("customer_past_flights"))
+    
+    form.rating.data = ticket.rating
+    form.comment.data = ticket.comment
+
+    return render_template("customer_flight_comment.html", form=form, flight=ticket.flight)

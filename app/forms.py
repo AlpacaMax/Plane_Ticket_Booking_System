@@ -1,6 +1,6 @@
 import datetime
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField, HiddenField
+from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField, HiddenField, TextAreaField
 from wtforms.validators import DataRequired, ValidationError, Length, EqualTo, Email, NumberRange, Regexp
 from app.models import Customer, Staff, Airline
 
@@ -146,3 +146,19 @@ class PurchaseForm(FlaskForm):
     expire_date = DateField("Expire Date",
                             validators=[DataRequired()])
     submit = SubmitField("Buy")
+
+class CommentForm(FlaskForm):
+    flight_num = HiddenField()
+    depart_datetime = HiddenField()
+    airline_name = HiddenField()
+    rating = SelectField("Rating",
+                         choices=[
+                             ('5','5'),
+                             ('4','4'),
+                             ('3','3'),
+                             ('2','2'),
+                             ('1','1')
+                         ],
+                         validators=[DataRequired()])
+    comment = TextAreaField("Comment")
+    submit = SubmitField("Submit")
