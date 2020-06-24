@@ -1,10 +1,11 @@
 import hashlib
+import copy
 import datetime
 from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -30,7 +31,9 @@ def filter_form_processor(form, flights):
             flights = flights.filter(Flight.depart_datetime < next_day)
     
     return flights
-    
+
+def date_to_datetime(a_date):
+    return datetime.datetime(a_date.year, a_date.month, a_date.day)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -362,3 +365,105 @@ def flight_comment():
     form.comment.data = ticket.comment
 
     return render_template("customer_flight_comment.html", form=form, flight=ticket.flight)
+
+@app.route("/spending", methods=["GET", "POST"])
+@login_required
+def spending_track():
+    if (current_user.get_user_type() == "Staff"):
+        flash("Please login as a customer to track your spendings")
+        return redirect(url_for("home"))
+    
+    form = DateFilterForm()
+
+    has_range = False
+    if (form.validate_on_submit()):
+        has_range = True
+        start_datetime = date_to_datetime(form.start_date.data)
+        end_datetime = date_to_datetime(form.end_date.data)
+    
+    if (has_range):
+        tickets_year = Ticket.query.filter(Ticket.customer_email==current_user.get_id(),
+                                           Ticket.purchase_datetime>=start_datetime,
+                                           Ticket.purchase_datetime<=end_datetime).all()
+    else:
+        tickets_year = Ticket.query.filter(Ticket.customer_email==current_user.get_id(),
+        Ticket.purchase_datetime>=datetime.datetime(datetime.datetime.now().year,1,1)).all()
+
+    past_year_spending = sum([ticket.price for ticket in tickets_year])
+
+    if (has_range):
+        first_month = (start_datetime.year, start_datetime.month)
+        end_month = (end_datetime.year, end_datetime.month)
+        month = first_month
+        months = [month]
+        while (month != end_month):
+            next_month = month[1] + 1
+            year = month[0]
+            if (next_month > 12):
+                next_month = 1
+                year += 1
+            month = (year, next_month)
+            months.append(month)
+    else:
+        today = datetime.datetime.today()
+        month = (today.year, today.month)
+        months = [month]
+        for i in range(5):
+            last_month = month[1] - 1
+            year = month[0]
+            if (last_month < 1):
+                last_month += 12
+                year -= 1
+            
+            month = (year, last_month)
+            months.append(month)
+
+        months.reverse()
+
+    month_labels = [month[1] for month in months]
+
+    if (has_range):
+        month_spendings = []
+        first_month_end = datetime.datetime(start_datetime.year, start_datetime.month, 1)
+        first_month_end += datetime.timedelta(days=31)
+        first_month_end -= datetime.timedelta(days=first_month_end.day - 1)
+        tickets_first_month = Ticket.query.filter(Ticket.customer_email==current_user.get_id(),
+                                                  Ticket.purchase_datetime<first_month_end,
+                                                  Ticket.purchase_datetime>=start_datetime).all()
+        first_month_spending = sum([ticket.price for ticket in tickets_first_month])
+
+        month_spendings = [first_month_spending]
+        for i in range(1, len(months) - 1):
+            month_start = datetime.datetime(months[i][0], months[i][1], 1)
+            month_end = month_start + datetime.timedelta(days=31)
+            month_end -= datetime.timedelta(days=month_end.day - 1)
+            tickets_month = Ticket.query.filter(Ticket.customer_email==current_user.get_id(),
+                Ticket.purchase_datetime<month_end,
+                Ticket.purchase_datetime>=month_start).all()
+            month_spending = sum([ticket.price for ticket in tickets_month])
+            month_spendings.append(month_spending)
+
+        last_month_start = datetime.datetime(end_datetime.year, end_datetime.month, 1)
+        tickets_last_month = Ticket.query.filter(Ticket.customer_email==current_user.get_id(),
+                                                 Ticket.purchase_datetime<=end_datetime,
+                                                 Ticket.purchase_datetime>=last_month_start).all()
+        last_month_spending = sum([ticket.price for ticket in tickets_last_month])
+        month_spendings.append(last_month_spending)
+    else:
+        month_spendings = []
+        for a_month in months:
+            month_start = datetime.datetime(a_month[0], a_month[1], 1)
+            month_end = month_start + datetime.timedelta(days=31)
+            month_end -= datetime.timedelta(days=month_end.day - 1)
+            tickets_month = Ticket.query.filter(Ticket.customer_email==current_user.get_id(),
+                Ticket.purchase_datetime<month_end,
+                Ticket.purchase_datetime>=month_start).all()
+            month_spending = sum([ticket.price for ticket in tickets_month])
+            month_spendings.append(month_spending)
+
+    return render_template("customer_spend_track.html",
+                           has_range=has_range,
+                           form=form,
+                           past_year_spending=past_year_spending,
+                           month_labels=month_labels,
+                           month_spendings=month_spendings)

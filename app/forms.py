@@ -162,3 +162,8 @@ class CommentForm(FlaskForm):
                          validators=[DataRequired()])
     comment = TextAreaField("Comment")
     submit = SubmitField("Submit")
+
+class DateFilterForm(FlaskForm):
+    start_date = DateField("From", validators=[DataRequired()])
+    end_date = DateField("To", validators=[DataRequired()])
+    submit = SubmitField("Filter")

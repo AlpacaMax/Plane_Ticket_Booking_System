@@ -1,0 +1,43 @@
+{% extends "customer_layout.html" %}
+
+{% block home_content %}
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {{ form.start_date.label() }}:
+    {{ form.start_date(type="date") }}<br>
+    {{ form.end_date.label() }}:
+    {{ form.end_date(type="date") }}<br>
+    {{ form.submit() }}
+</form>
+
+<h3>
+    {% if has_range %}
+        Given range spending:
+    {% else %}
+        Past year spending:
+    {% endif %}
+    <span style="font-weight: lighter;">${{ past_year_spending }}</span>
+</h3>
+<canvas id="myChart" width="400" height="100"></canvas>
+<script>
+    var ctx = document.getElementById('myChart');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ month_labels }},
+            datasets: [{
+                data: {{ month_spendings }},
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+{% endblock %}
