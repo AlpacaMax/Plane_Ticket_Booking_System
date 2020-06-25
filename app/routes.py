@@ -5,7 +5,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -313,19 +313,6 @@ def customer_past_flights():
 
     return render_template("customer_past_flights.html", flights=flights)
 
-@app.route("/staffFutureFlights", methods=["GET"])
-@login_required
-def staff_future_flights():
-    if (current_user.get_user_type() == "Customer"):
-        return redirect(url_for("customer_future_flights"))
-        
-    return "Staff Home"
-
-@app.route("/staffPastFlights", methods=["GET"])
-@login_required
-def staff_past_flights():
-    return "Staff Past Flights"
-
 @app.route("/flightComment", methods=["GET", "POST"])
 @login_required
 def flight_comment():
@@ -467,3 +454,47 @@ def spending_track():
                            past_year_spending=past_year_spending,
                            month_labels=month_labels,
                            month_spendings=month_spendings)
+
+@app.route("/staffFlights", methods=["GET"])
+@login_required
+def staff_flights():
+    return render_template("staff_flights.html")
+
+@app.route("/createFlight", methods=["GET", "POST"])
+@login_required
+def create_flight():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot create flights!")
+        return redirect(url_for("home"))
+    
+    form = CreateFlightForm()
+    form.airline_name.data = current_user.airline_name
+    form.create_airplane_choices(current_user.airline_name)
+
+    if (form.validate_on_submit()):
+        new_flight = Flight(
+            flight_num = form.flight_num.data,
+            depart_datetime = to_datetime(str(form.depart_date.data), form.depart_time.data),
+            airline_name = current_user.airline_name,
+            depart_airport = form.depart_airport.data,
+            arrival_datetime = to_datetime(str(form.arrival_date.data), form.arrival_time.data),
+            arrival_airport = form.arrival_airport.data,
+            base_price = form.base_price.data,
+            airplane_id = form.airplane_id.data,
+            status = "On-time"
+        )
+        db.session.add(new_flight)
+        db.session.commit()
+        flash("Flight added!")
+
+    return render_template("create_flight.html", form=form)
+
+@app.route("/createAirplane", methods=["GET", "POST"])
+@login_required
+def create_airplane():
+    return render_template("create_airplane.html")
+
+@app.route("/addAirport", methods=["GET", "POST"])
+@login_required
+def add_airport():
+    return render_template("add_airport.html")

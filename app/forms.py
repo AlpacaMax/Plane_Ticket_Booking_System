@@ -1,8 +1,8 @@
 import datetime
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField, HiddenField, TextAreaField
+from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField, HiddenField, TextAreaField, IntegerField, DateTimeField
 from wtforms.validators import DataRequired, ValidationError, Length, EqualTo, Email, NumberRange, Regexp
-from app.models import Customer, Staff, Airline
+from app.models import Customer, Staff, Airline, Airport, Airplane, Flight
 
 def diff_data(another_field):
     def _diff_data(form, field):
@@ -18,6 +18,9 @@ def GreaterEqualToToday(value, message, enabled=True):
             raise ValidationError(message)
     
     return _GreaterEqualToToday
+
+def to_datetime(date, time):
+    return datetime.datetime.fromisoformat(date + ' ' + time)
 
 class FilterForm(FlaskForm):
     source_city_airport = SelectField("Source city/Airport",
@@ -167,3 +170,47 @@ class DateFilterForm(FlaskForm):
     start_date = DateField("From", validators=[DataRequired()])
     end_date = DateField("To", validators=[DataRequired()])
     submit = SubmitField("Filter")
+
+class CreateFlightForm(FlaskForm):
+    airline_name = HiddenField()
+    flight_num = StringField("Flignt Number",
+                             validators=[DataRequired(), Length(3,5)])
+    depart_date = DateField("Depart Date", validators=[DataRequired()])
+    depart_time = StringField("Depart Time", validators=[DataRequired()])
+    depart_airport = SelectField("Depart Airport",
+                choices=[(airport.name, airport.name) for airport in Airport.query.all()])
+    arrival_date = DateField("Arrival Date", validators=[DataRequired()])
+    arrival_time = StringField("Arrival Time", validators=[DataRequired()])
+    arrival_airport = SelectField("Arrival Airport",
+                choices=[(airport.name, airport.name) for airport in Airport.query.all()])
+    base_price = IntegerField("Base Price", validators=[DataRequired()])
+    airplane_id = SelectField("Airplane")
+    submit = SubmitField("Create")
+
+    def create_airplane_choices(self, airline_name):
+        self.airplane_id.choices = [
+            (airplane.id, airplane.id) for airplane in Airplane.query.filter_by(airline_name=airline_name).all()
+        ]
+
+    def validate_flight_num(self, flight_num):
+        depart_datetime = to_datetime(str(self.depart_date.data), self.depart_time.data)
+        print(depart_datetime)
+        flight = Flight.query.filter(Flight.flight_num==flight_num.data,
+                                     Flight.depart_datetime==depart_datetime,
+                                     Flight.airline_name==self.airline_name.data).first()
+        if (flight):
+            raise ValidationError("Flight exists! Please create a different one")
+    
+    def validate_depart_date(self, depart_date):
+        if (depart_date.data <= datetime.date.today()):
+            raise ValidationError("Please choose a future depart datetime")
+    
+    def validate_arrival_date(self, arrival_date):
+        depart_datetime = to_datetime(str(self.depart_date.data), self.depart_time.data)
+        arrival_datetime = to_datetime(str(self.arrival_date.data), self.arrival_time.data)
+        if (arrival_datetime <= depart_datetime):
+            raise ValidationError("Please choose an arrival datetime that is later than depart datetime")
+    
+    def validate_arrival_airport(self, arrival_airport):
+        if (arrival_airport.data == self.depart_airport.data):
+            raise ValidationError("Arrival and depart airport cannot be the same")

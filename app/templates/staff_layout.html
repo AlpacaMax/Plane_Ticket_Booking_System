@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Welcome! {{ current_user.first_name }} {{ current_user.last_name }}</h1>
+
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('staff_flights') }}"">View Flights</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('create_flight') }}">Create Flight</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('create_airplane') }}">Create Airplane</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('add_airport') }}">Add Airport</a>
+        </li>
+    </ul>
+
+    {% block home_content %}{% endblock %}
+{% endblock content %}

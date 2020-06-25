@@ -1,0 +1,89 @@
+{% extends 'staff_layout.html' %}
+
+{% block home_content %}
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {{ form.flight_num.label() }}:
+        {{ form.flight_num() }}<br>
+        {% if form.flight_num.errors %}
+            <div class="text-danger">
+                {% for error in form.flight_num.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.depart_date.label() }}:
+        {{ form.depart_date(type="date") }}<br>
+        {% if form.depart_date.errors %}
+            <div class="text-danger">
+                {% for error in form.depart_date.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.depart_time.label() }}:
+        {{ form.depart_time(type="time") }}<br>
+        {% if form.depart_time.errors %}
+            <div class="text-danger">
+                {% for error in form.depart_time.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.depart_airport.label() }}:
+        {{ form.depart_airport() }}<br>
+        {% if form.depart_airport.errors %}
+            <div class="text-danger">
+                {% for error in form.depart_airport.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.arrival_date.label() }}:
+        {{ form.arrival_date(type="date") }}<br>
+        {% if form.arrival_date.errors %}
+            <div class="text-danger">
+                {% for error in form.arrival_date.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.arrival_time.label() }}:
+        {{ form.arrival_time(type="time") }}<br>
+        {% if form.arrival_time.errors %}
+            <div class="text-danger">
+                {% for error in form.arrival_time.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.arrival_airport.label() }}:
+        {{ form.arrival_airport() }}<br>
+        {% if form.arrival_airport.errors %}
+            <div class="text-danger">
+                {% for error in form.arrival_airport.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.base_price.label() }}:
+        {{ form.base_price() }}<br>
+        {% if form.base_price.errors %}
+            <div class="text-danger">
+                {% for error in form.base_price.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.airplane_id.label() }}:
+        {{ form.airplane_id() }}<br>
+        {% if form.airplane_id.errors %}
+            <div class="text-danger">
+                {% for error in form.airplane_id.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.submit() }}
+    </form>
+{% endblock %}
