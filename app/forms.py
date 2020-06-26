@@ -228,4 +228,14 @@ class AddAirplaneForm(FlaskForm):
         airplane = Airplane.query.filter(Airplane.airline_name==self.airline_name.data,
                                          Airplane.id==id.data).first()
         if (airplane):
-            raise ValidationError("Airplane ID already exists! Please write a different one")
+            raise ValidationError("Airplane ID exists! Please write a different one")
+
+class AddAirportForm(FlaskForm):
+    name = StringField("Airport name", validators=[DataRequired()])
+    city = StringField("City", validators=[DataRequired()])
+    submit = SubmitField("Add")
+
+    def validate_name(self, name):
+        airport = Airport.query.filter(Airport.name==name.data).first()
+        if (airport):
+            raise ValidationError("Airport name exists! Please write a different one")

@@ -1,5 +1,26 @@
 {% extends 'staff_layout.html' %}
 
 {% block home_content %}
-
+<form method="POST" action"">
+    {{ form.hidden_tag() }}
+    {{ form.name.label() }}:
+    {{ form.name() }}<br>
+    {% if form.name.errors %}
+        <div class="text-danger">
+            {% for error in form.name.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {{ form.city.label() }}:
+    {{ form.city() }}<br>
+    {% if form.city.errors %}
+        <div class="text-danger">
+            {% for error in form.city.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {{ form.submit() }}
+</form>
 {% endblock %}

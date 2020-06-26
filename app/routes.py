@@ -5,7 +5,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -514,4 +514,19 @@ def create_airplane():
 @app.route("/addAirport", methods=["GET", "POST"])
 @login_required
 def add_airport():
-    return render_template("add_airport.html")
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot add airport!")
+        return redirect(url_for("home"))
+    
+    form = AddAirportForm()
+
+    if (form.validate_on_submit()):
+        airport = Airport(
+            name = form.name.data,
+            city = form.city.data
+        )
+        db.session.add(airport)
+        db.session.commit()
+        flash("Airport added!")
+
+    return render_template("add_airport.html", form=form)
