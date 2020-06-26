@@ -214,3 +214,18 @@ class CreateFlightForm(FlaskForm):
     def validate_arrival_airport(self, arrival_airport):
         if (arrival_airport.data == self.depart_airport.data):
             raise ValidationError("Arrival and depart airport cannot be the same")
+
+class AddAirplaneForm(FlaskForm):
+    airline_name = HiddenField()
+    id = StringField("Airplane ID", validators=[DataRequired(), Length(3,5)])
+    num_seat = IntegerField("Number Of Seat", 
+                            validators=[DataRequired(), 
+                                        NumberRange(min=0,
+                                                    message="Please enter a non-negative number")])
+    submit = SubmitField("Add")
+
+    def validate_id(self, id):
+        airplane = Airplane.query.filter(Airplane.airline_name==self.airline_name.data,
+                                         Airplane.id==id.data).first()
+        if (airplane):
+            raise ValidationError("Airplane ID already exists! Please write a different one")
