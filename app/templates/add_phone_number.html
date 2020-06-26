@@ -1,0 +1,17 @@
+{% extends "staff_layout.html" %}
+
+{% block home_content %}
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {{ form.number.label() }}:
+    {{ form.number() }}<br>
+    {% if form.number.errors %}
+        <div class="text-danger">
+            {% for error in form.number.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {{ form.submit() }}
+</form>
+{% endblock %}

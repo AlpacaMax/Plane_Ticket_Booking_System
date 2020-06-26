@@ -2,7 +2,7 @@ import datetime
 from flask_wtf import FlaskForm
 from wtforms import SelectField, SubmitField, DateField, BooleanField, StringField, PasswordField, HiddenField, TextAreaField, IntegerField, DateTimeField
 from wtforms.validators import DataRequired, ValidationError, Length, EqualTo, Email, NumberRange, Regexp
-from app.models import Customer, Staff, Airline, Airport, Airplane, Flight
+from app.models import Customer, Staff, Airline, Airport, Airplane, Flight, Phone
 
 def diff_data(another_field):
     def _diff_data(form, field):
@@ -239,3 +239,14 @@ class AddAirportForm(FlaskForm):
         airport = Airport.query.filter(Airport.name==name.data).first()
         if (airport):
             raise ValidationError("Airport name exists! Please write a different one")
+
+class AddPhoneNumberForm(FlaskForm):
+    username = HiddenField()
+    number = StringField("Phone Number", validators=[DataRequired()])
+    submit = SubmitField("Add")
+
+    def validate_number(self, number):
+        phone = Phone.query.filter(Phone.username==self.username.data,
+                                   Phone.number==number.data).first()
+        if (phone):
+            raise ValidationError("You already have this number! Add a different one")

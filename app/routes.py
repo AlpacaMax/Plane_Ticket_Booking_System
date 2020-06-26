@@ -5,7 +5,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm, AddPhoneNumberForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -530,3 +530,24 @@ def add_airport():
         flash("Airport added!")
 
     return render_template("add_airport.html", form=form)
+
+@app.route("/addPhoneNumber", methods=["GET", "POST"])
+@login_required
+def add_phone_number():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot add phone number")
+        return redirect(url_for("home"))
+    
+    form = AddPhoneNumberForm()
+    form.username.data = current_user.username
+
+    if (form.validate_on_submit()):
+        phone = Phone(
+            username = current_user.username,
+            number = form.number.data
+        )
+        db.session.add(phone)
+        db.session.commit()
+        flash("Phone number added!")
+
+    return render_template("add_phone_number.html", form=form)
