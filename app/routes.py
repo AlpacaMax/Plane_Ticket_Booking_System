@@ -599,3 +599,35 @@ def quarterly_revenue_earned():
                                  second_quarter_revenue,
                                  third_quarter_revenue,
                                  fourth_quarter_revenue])
+
+@app.route("/topDests", methods=["GET"])
+@login_required
+def top_destinations():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot view top destinations")
+        return redirect(url_for("home"))
+    
+    cities = {airport.city : 0 for airport in Airport.query.all()}
+    three_months_tickets = Ticket.query.filter(Ticket.purchase_datetime>datetime.datetime.today()-datetime.timedelta(days=90)).all()
+    for ticket in three_months_tickets:
+        arrival_city = Airport.query.get(ticket.flight.arrival_airport).city
+        cities[arrival_city] += 1
+    
+    three_months_top_dest = sorted(cities, key=cities.__getitem__, reverse=True)[:3]
+
+    cities = {airport.city : 0 for airport in Airport.query.all()}
+    last_year = datetime.datetime.today().year - 1
+    last_year_tickets = Ticket.query.filter(
+        Ticket.purchase_datetime >= datetime.datetime(last_year,1,1),
+        Ticket.purchase_datetime <= datetime.datetime(last_year,12,31)
+    ).all()
+
+    for ticket in last_year_tickets:
+        arrival_city = Airport.query.get(ticket.flight.arrival_airport).city
+        cities[arrival_city] += 1
+    
+    last_year_top_dest = sorted(cities, key=cities.__getitem__, reverse=True)[:3]
+
+    return render_template("top_dests.html",
+                           three_months_top_dest=three_months_top_dest,
+                           last_year_top_dest=last_year_top_dest)

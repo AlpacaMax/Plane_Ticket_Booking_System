@@ -1,0 +1,15 @@
+{% extends "staff_layout.html" %}
+
+{% block home_content %}
+
+<h2>Last three month Top Destinations</h2>
+{% for city in three_months_top_dest %}
+    <span>{{ city }}</span><br>
+{% endfor %}
+
+<h2>Last year Top Destinations</h2>
+{% for city in last_year_top_dest %}
+    <span>{{ city }}</span><br>
+{% endfor %}
+
+{% endblock %}
