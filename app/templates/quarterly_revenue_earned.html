@@ -1,0 +1,31 @@
+{% extends "staff_layout.html" %}
+
+{% block home_content %}
+<h2>{{ year }} Quarterly Revenue</h2>
+<canvas id="myChart" width="400" height="100"></canvas>
+<script>
+    var ctx = document.getElementById('myChart');
+    var data = {
+        datasets: [{
+            data: {{ data }},
+            backgroundColor: [
+                "rgb(222,1,238)",
+                "rgb(254,0,13)",
+                "rgb(23,246,0)",
+                "rgb(215,253,0)"
+            ],
+        }],
+        
+        labels: [
+            'First',
+            'Second',
+            'Third',
+            'Fourth'
+        ]
+    };
+    var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: data
+    });
+</script>
+{% endblock %}

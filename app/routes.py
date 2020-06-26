@@ -551,3 +551,51 @@ def add_phone_number():
         flash("Phone number added!")
 
     return render_template("add_phone_number.html", form=form)
+
+@app.route("/quarterlyRevenue", methods=["GET"])
+@login_required
+def quarterly_revenue_earned():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You are not allowed to see quarterly revenue earned")
+        return redirect(url_for("home"))
+    
+    last_year = datetime.datetime.today().year - 1
+
+    first_day = datetime.datetime(last_year, 1, 1)
+    first_quarter = datetime.datetime(last_year, 4, 1)
+    second_quarter = datetime.datetime(last_year, 7, 1)
+    third_quarter = datetime.datetime(last_year, 10, 1)
+    fourth_quarter = datetime.datetime(last_year+1, 1, 1)
+    
+    first_quarter_tickets = Ticket.query.filter(
+        Ticket.airline_name == current_user.airline_name,
+        Ticket.purchase_datetime >= first_day,
+        Ticket.purchase_datetime < first_quarter
+    ).all()
+    second_quarter_tickets = Ticket.query.filter(
+        Ticket.airline_name == current_user.airline_name,
+        Ticket.purchase_datetime >= first_quarter,
+        Ticket.purchase_datetime < second_quarter
+    ).all()
+    third_quarter_tickets = Ticket.query.filter(
+        Ticket.airline_name == current_user.airline_name,
+        Ticket.purchase_datetime >= second_quarter,
+        Ticket.purchase_datetime < third_quarter
+    ).all()
+    fourth_quarter_tickets = Ticket.query.filter(
+        Ticket.airline_name == current_user.airline_name,
+        Ticket.purchase_datetime >= third_quarter,
+        Ticket.purchase_datetime < fourth_quarter
+    ).all()
+
+    first_quarter_revenue = sum([ticket.price for ticket in first_quarter_tickets])
+    second_quarter_revenue = sum([ticket.price for ticket in second_quarter_tickets])
+    third_quarter_revenue = sum([ticket.price for ticket in third_quarter_tickets])
+    fourth_quarter_revenue = sum([ticket.price for ticket in fourth_quarter_tickets])
+
+    return render_template("quarterly_revenue_earned.html",
+                           year=last_year,
+                           data=[first_quarter_revenue,
+                                 second_quarter_revenue,
+                                 third_quarter_revenue,
+                                 fourth_quarter_revenue])
