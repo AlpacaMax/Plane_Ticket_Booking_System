@@ -171,6 +171,10 @@ class DateFilterForm(FlaskForm):
     end_date = DateField("To", validators=[DataRequired()])
     submit = SubmitField("Filter")
 
+    def validate_end_date(self, end_date):
+        if (end_date.data < self.start_date.data):
+            raise ValidationError("Please choose a date later than start date")
+
 class CreateFlightForm(FlaskForm):
     airline_name = HiddenField()
     flight_num = StringField("Flignt Number",

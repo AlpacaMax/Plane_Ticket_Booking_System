@@ -1,0 +1,53 @@
+{% extends "staff_layout.html" %}
+
+{% block home_content %}
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {{ form.start_date.label() }}:
+    {{ form.start_date(type="date") }}<br>
+    {{ form.end_date.label() }}:
+    {{ form.end_date(type="date") }}<br>
+    {% if form.end_date.errors %}
+        <div class="text-danger">
+            {% for error in form.end_date.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {{ form.submit() }}
+</form>
+
+<form method="GET" action="{{ url_for('report') }}">
+    <input type="hidden" name="last_year" value="last_year">
+    <input type="submit" value="Last Year">
+</form>
+
+<form method="GET" action="{{ url_for('report') }}">
+    <input type="hidden" name="last_month" value="last_month">
+    <input type="submit" value="Last Month">
+</form>
+
+<h3>Total number of tickets sold: {{ total_sold }}</h3>
+<canvas id="myChart" width="400" height="100"></canvas>
+<script>
+    var ctx = document.getElementById('myChart');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ month_labels }},
+            datasets: [{
+                data: {{ month_spendings }},
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+{% endblock %}

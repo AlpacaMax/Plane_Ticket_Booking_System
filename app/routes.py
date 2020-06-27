@@ -410,7 +410,6 @@ def spending_track():
     month_labels = [month[1] for month in months]
 
     if (has_range):
-        month_spendings = []
         first_month_end = datetime.datetime(start_datetime.year, start_datetime.month, 1)
         first_month_end += datetime.timedelta(days=31)
         first_month_end -= datetime.timedelta(days=first_month_end.day - 1)
@@ -673,3 +672,84 @@ def view_customer():
     flights = [ticket.flight for ticket in tickets]
     
     return render_template("view_customer.html", email=email, flights=flights)
+
+@app.route("/report", methods=["GET", "POST"])
+@login_required
+def report():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot view report")
+        return redirect(url_for("home"))
+
+    form = DateFilterForm()
+
+    if (form.validate_on_submit()):
+        start_datetime = date_to_datetime(form.start_date.data)
+        end_datetime = date_to_datetime(form.end_date.data)
+    elif (request.args.get("last_month")):
+        this_year = datetime.datetime.today().year
+        this_month = datetime.datetime.today().month
+        start_year = this_year
+        start_month = this_month - 1
+        if (start_month < 1):
+            start_year -= 1
+            start_month = 12
+        
+        start_datetime = datetime.datetime(start_year, start_month, 1)
+        end_datetime = datetime.datetime(this_year, this_month, 1) - datetime.timedelta(seconds=1)
+    else:
+        last_year = datetime.datetime.today().year - 1
+        start_datetime = datetime.datetime(last_year, 1, 1)
+        end_datetime = datetime.datetime(last_year + 1, 1, 1) - datetime.timedelta(seconds=1)
+
+    tickets_year = Ticket.query.filter(Ticket.airline_name==current_user.airline_name,
+                                       Ticket.purchase_datetime>=start_datetime,
+                                       Ticket.purchase_datetime<end_datetime).all()
+
+    total_sold = len(tickets_year)
+
+    first_month = (start_datetime.year, start_datetime.month)
+    end_month = (end_datetime.year, end_datetime.month)
+    month = first_month
+    months = [month]
+    while (month != end_month):
+        next_month = month[1] + 1
+        year = month[0]
+        if (next_month > 12):
+            next_month = 1
+            year += 1
+        month = (year, next_month)
+        months.append(month)
+    
+    month_labels = months
+
+    first_month_end = datetime.datetime(start_datetime.year, start_datetime.month, 1)
+    first_month_end += datetime.timedelta(days=31)
+    first_month_end -= datetime.timedelta(days=first_month_end.day - 1)
+    tickets_first_month = Ticket.query.filter(Ticket.airline_name==current_user.airline_name,
+                                              Ticket.purchase_datetime<first_month_end,
+                                              Ticket.purchase_datetime>=start_datetime).all()
+    first_month_spending = len(tickets_first_month)
+
+    month_spendings = [first_month_spending]
+    for i in range(1, len(months) - 1):
+        month_start = datetime.datetime(months[i][0], months[i][1], 1)
+        month_end = month_start + datetime.timedelta(days=31)
+        month_end -= datetime.timedelta(days=month_end.day - 1)
+        tickets_month = Ticket.query.filter(Ticket.airline_name==current_user.airline_name,
+                                            Ticket.purchase_datetime<month_end,
+                                            Ticket.purchase_datetime>=month_start).all()
+        month_spending = len(tickets_month)
+        month_spendings.append(month_spending)
+
+    last_month_start = datetime.datetime(end_datetime.year, end_datetime.month, 1)
+    tickets_last_month = Ticket.query.filter(Ticket.airline_name==current_user.airline_name,
+                                             Ticket.purchase_datetime<=end_datetime,
+                                             Ticket.purchase_datetime>=last_month_start).all()
+    last_month_spending = len(tickets_last_month)
+    month_spendings.append(last_month_spending)
+
+    return render_template("report.html",
+                           form=form,
+                           total_sold=total_sold,
+                           month_labels=month_labels,
+                           month_spendings=month_spendings)
