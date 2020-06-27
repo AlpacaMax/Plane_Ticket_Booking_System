@@ -1,0 +1,13 @@
+{% extends "staff_layout.html" %}
+
+{% block home_content %}
+<h4>Change flight {{ request.args.get("flight_num") }}</h4>
+<h4>departing on {{ request.args.get("depart_datetime") }} </h4>
+
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {{ form.status.label() }}:
+    {{ form.status() }}<br>
+    {{ form.submit() }}
+</form>
+{% endblock %}

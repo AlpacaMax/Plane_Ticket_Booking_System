@@ -5,7 +5,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm, AddPhoneNumberForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm, AddPhoneNumberForm, ChangeStatusForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -457,7 +457,13 @@ def spending_track():
 @app.route("/staffFlights", methods=["GET"])
 @login_required
 def staff_flights():
-    return render_template("staff_flights.html")
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot see these flights!")
+        return redirect(url_for("home"))
+
+    flights = Flight.query.filter(Flight.airline_name==current_user.airline_name).all()
+
+    return render_template("staff_flights.html", flights=flights)
 
 @app.route("/createFlight", methods=["GET", "POST"])
 @login_required
@@ -753,3 +759,38 @@ def report():
                            total_sold=total_sold,
                            month_labels=month_labels,
                            month_spendings=month_spendings)
+
+@app.route("/changeStatus", methods=["GET", "POST"])
+@login_required
+def change_status():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot view report")
+        return redirect(url_for("home"))
+
+    form = ChangeStatusForm()
+
+    flight_num = escape(request.args.get("flight_num"))
+    depart_datetime = datetime.datetime.fromisoformat(request.args.get("depart_datetime"))
+    airline_name = current_user.airline_name
+
+    flight = Flight.query.filter(
+        Flight.flight_num==flight_num,
+        Flight.depart_datetime==depart_datetime,
+        Flight.airline_name==airline_name
+    ).first()
+
+    if (flight is None):
+            flash("Flight doesn't exist. Please choose a different one!")
+            return redirect(url_for("staff_flights"))
+
+    if (form.validate_on_submit()):
+        flight.status = form.status.data
+        db.session.add(flight)
+        db.session.commit()
+
+        flash("Successfully changed the status")
+        return redirect(url_for("staff_flights"))
+    
+    form.status.data = flight.status
+    
+    return render_template("change_status.html", form=form)

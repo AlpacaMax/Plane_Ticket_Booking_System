@@ -254,3 +254,16 @@ class AddPhoneNumberForm(FlaskForm):
                                    Phone.number==number.data).first()
         if (phone):
             raise ValidationError("You already have this number! Add a different one")
+
+class ChangeStatusForm(FlaskForm):
+    flight_num = HiddenField()
+    depart_datetime = HiddenField()
+    airline_name = HiddenField()    
+    status = SelectField("Status",
+                         choices=[
+                             ("On-time", "On-time"),
+                             ("Delay", "Delay"),
+                             ("Departed", "Departed"),
+                             ("Arrived", "Arrived")
+                         ])
+    submit = SubmitField("Change")
