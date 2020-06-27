@@ -1,0 +1,8 @@
+{% extends "staff_layout.html" %}
+
+{% block home_content %}
+<h3>All customers sorted based on the number of tickets bought last year</h3>
+{% for row in result %}
+    <a href="{{ url_for('view_customer', email=row[0]) }}">{{ row[0] }}</a><br>
+{% endfor %}
+{% endblock %}

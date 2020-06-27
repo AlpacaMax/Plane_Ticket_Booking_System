@@ -631,3 +631,45 @@ def top_destinations():
     return render_template("top_dests.html",
                            three_months_top_dest=three_months_top_dest,
                            last_year_top_dest=last_year_top_dest)
+
+@app.route("/allCustomers", methods=["GET"])
+@login_required
+def all_customers():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot view all customers")
+        return redirect(url_for("home"))
+
+    last_year = datetime.datetime.today().year - 1
+    last_year_start = datetime.datetime(last_year, 1, 1)
+    this_year_start = datetime.datetime(last_year+1, 1, 1)
+
+    query = '''select customer.email
+               from customer
+               order by (select count(ticket.id)
+                         from ticket
+                         where ticket.airline_name="{}"
+                         and ticket.purchase_datetime >= "{}"
+                         and ticket.purchase_datetime < "{}"
+                         and ticket.customer_email=customer.email
+                         group by ticket.customer_email) desc'''.format(current_user.airline_name,
+                                                                        str(last_year_start),
+                                                                        str(this_year_start))
+
+    result = db.session.execute(query)
+
+    return render_template("all_customers.html", result=result)
+
+@app.route("/viewCustomer", methods=["GET"])
+@login_required
+def view_customer():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot view this customer")
+        return redirect(url_for("home"))
+
+    email = request.args.get("email")
+    tickets = Ticket.query.filter(Ticket.customer_email==email,
+                                  Ticket.airline_name==current_user.airline_name,
+                                  Ticket.depart_datetime<datetime.datetime.now())
+    flights = [ticket.flight for ticket in tickets]
+    
+    return render_template("view_customer.html", email=email, flights=flights)
