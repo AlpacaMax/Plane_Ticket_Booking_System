@@ -35,9 +35,9 @@ def filter_form_processor(form, flights):
 def date_to_datetime(a_date):
     return datetime.datetime(a_date.year, a_date.month, a_date.day)
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def home():
-    form = FilterForm(request.args)
+    form = FilterForm()
 
     airports = Airport.query.order_by(Airport.city).all()
     choices = [("any", "Any")]\
@@ -58,7 +58,7 @@ def home():
                            form=form,
                            template_for_select="select_for_home.html")
 
-@app.route("/returnTrip", methods=["GET"])
+@app.route("/returnTrip", methods=["GET", "POST"])
 def return_trip_choosing():
     if (current_user.is_authenticated and current_user.get_user_type() == "Staff"):
         flash("You are not allowed to purchase flights")
@@ -97,6 +97,16 @@ def return_trip_choosing():
     return_depart_city = arrival_city
     return_arrival_city = depart_city
 
+    form = FilterForm()
+
+    airports = Airport.query.order_by(Airport.city).all()
+    choices = [("any", "Any")]\
+              + [(airport.name, "%s/%s" % (airport.city, airport.name))
+                 for airport in airports]
+
+    form.source_city_airport.choices = choices
+    form.dest_city_airport.choices = choices
+
     all_airports_A = aliased(Airport)
     all_airports_B = aliased(Airport)
 
@@ -105,10 +115,13 @@ def return_trip_choosing():
               join(all_airports_B, Flight.arrival_airport==all_airports_B.name).\
               filter(all_airports_A.city == return_depart_city).\
               filter(all_airports_B.city == return_arrival_city).\
-              filter(Flight.depart_datetime > depart_flight.arrival_datetime).all()
+              filter(Flight.depart_datetime > depart_flight.arrival_datetime)
 
-    return render_template("return_trip_select.html", 
-                           flights = flights, 
+    flights = filter_form_processor(form, flights).order_by(Flight.depart_datetime)
+
+    return render_template("return_trip_select.html",
+                           form=form,
+                           flights = flights.all(),
                            template_for_select = "select_for_return_trip.html",
                            depart_flight_num = depart_flight_num,
                            depart_datetime = depart_datetime,
