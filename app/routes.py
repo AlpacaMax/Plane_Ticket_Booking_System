@@ -80,6 +80,9 @@ def return_trip_choosing():
     elif (depart_flight.get_num_tickets() == depart_flight.airplane.num_seat):
         flash(f"This flight is full. Please choose a different flight.")
         return redirect(url_for("home"))
+    elif (depart_datetime < datetime.datetime.now()):
+        flash(f"This flight has departed. Please choose a different flight.")
+        return redirect(url_for("home"))
     
     if (current_user.is_authenticated):
         ticket = Ticket.query.filter(Ticket.flight_num==depart_flight_num,
@@ -147,6 +150,10 @@ def view_selected_flights():
     elif (depart_flight.get_num_tickets() == depart_flight.airplane.num_seat):
         flash(f"This flight is full. Please choose a different flight.")
         return redirect(url_for("home"))
+    elif (depart_datetime < datetime.datetime.now()):
+        flash(f"This flight has departed. Please choose a different flight.")
+        return redirect(url_for("home"))
+
     if (current_user.is_authenticated):
         ticket = Ticket.query.filter(Ticket.flight_num==depart_flight_num,
                                     Ticket.depart_datetime==depart_datetime,
