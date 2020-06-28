@@ -1,7 +1,72 @@
 {% extends 'staff_layout.html' %}
 
 {% block home_content %}
+<form method="POST" action"">
+    <label style="font-weight:bold">Filter by: </label>
+    {{ form.hidden_tag() }}
+
+    {{ form.source_city_airport.label() }}
+    {{ form.source_city_airport() }}
+    {% if form.source_city_airport.errors %}
+        <div class="text-danger">
+            {% for error in form.source_city_airport.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {{ form.dest_city_airport.label() }}
+    {{ form.dest_city_airport() }}
+    {% if form.dest_city_airport.errors %}
+        <div class="text-danger">
+            {% for error in form.dest_city_airport.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {{ form.gonna_filter_date.label() }}
+    {{ form.gonna_filter_date() }}
+    {% if form.gonna_filter_date.errors %}
+        <div class="text-danger">
+            {% for error in form.gonna_filter_date.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {{ form.start_date.label() }}
+    {{ form.start_date(type="date") }}
+    {% if form.start_date.errors %}
+        <div class="text-danger">
+            {% for error in form.start_date.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {{ form.end_date.label() }}
+    {{ form.end_date(type="date") }}
+    {% if form.end_date.errors %}
+        <div class="text-danger">
+            {% for error in form.end_date.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {{ form.submit() }}
+</form>
+
 <hr>
+{% if not flights %}
+<div class="alert alert-warning">
+    <span style="font-style:italic;font-weight:lighter;">
+        No flight matches your filter options!
+    </span>
+</div>
+{% endif %}
+
 {% for flight in flights %}
     <div>
         <span style="font-weight:lighter">{{ flight.depart_datetime.strftime("%m/%d/%Y") }}</span><br>
@@ -14,8 +79,8 @@
         </h2>
         <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span><br>
         <span style="color:gray">{{ flight.status }}</span><br>
-        <a href="{{ url_for('change_status', flight_num=flight.flight_num, depart_datetime=flight.depart_datetime) }}">Change Status</a><br>
-        <a href="{{ url_for('view_comments', flight_num=flight.flight_num, depart_datetime=flight.depart_datetime) }}">View Rating and Comments</a>
+        <a href="{{ url_for('change_status', source_city=flight.source_city, depart_datetime=flight.depart_datetime) }}">Change Status</a><br>
+        <a href="{{ url_for('view_comments', source_city=flight.source_city, depart_datetime=flight.depart_datetime) }}">View Rating and Comments</a>
     </div>
     <hr>
 {% endfor %}

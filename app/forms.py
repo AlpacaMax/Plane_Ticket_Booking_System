@@ -19,7 +19,7 @@ def GreaterEqualToToday(value, message, enabled=True):
     
     return _GreaterEqualToToday
 
-def to_datetime(date, time):
+def to_datetime(date, time='00:00:00'):
     return datetime.datetime.fromisoformat(date + ' ' + time)
 
 class FilterForm(FlaskForm):
@@ -198,7 +198,6 @@ class CreateFlightForm(FlaskForm):
 
     def validate_flight_num(self, flight_num):
         depart_datetime = to_datetime(str(self.depart_date.data), self.depart_time.data)
-        print(depart_datetime)
         flight = Flight.query.filter(Flight.flight_num==flight_num.data,
                                      Flight.depart_datetime==depart_datetime,
                                      Flight.airline_name==self.airline_name.data).first()
@@ -267,3 +266,29 @@ class ChangeStatusForm(FlaskForm):
                              ("Arrived", "Arrived")
                          ])
     submit = SubmitField("Change")
+
+class StaffFlightFilterForm(FlaskForm):
+    start_date = StringField("From")
+    end_date = StringField("To")
+    source_city_airport = SelectField("Source city/Airport")
+    dest_city_airport = SelectField("Destination city/Airport")
+    gonna_filter_date = BooleanField("Select a date")
+    submit = SubmitField("Filter")
+
+    def create_choices(self):
+        choices = [('any', 'Any')] + [(airport.name, airport.name) for airport in Airport.query.all()]
+        self.source_city_airport.choices = choices
+        self.dest_city_airport.choices = choices
+
+    def validate_end_date(self, end_date):
+        print(end_date.data)
+        if (end_date.data != ""
+            and self.start_date.data != ""
+            and to_datetime(end_date.data) < to_datetime(self.start_date.data)):
+            raise ValidationError("Please choose a date later than start date")
+    
+    def validate_dest_city_airport(self, dest_city_airport):
+        if (self.source_city_airport.data == self.dest_city_airport.data
+            and self.source_city_airport.data != "any"
+            and self.source_city_airport.data is not None):
+            raise ValidationError("Cannot have same source airport and destination airport")

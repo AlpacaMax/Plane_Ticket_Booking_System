@@ -5,7 +5,7 @@ from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
 from app import app, db, bcrypt
-from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm, AddPhoneNumberForm, ChangeStatusForm
+from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm, AddPhoneNumberForm, ChangeStatusForm, StaffFlightFilterForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -23,7 +23,7 @@ def filter_form_processor(form, flights):
         if (form.source_city_airport.data != "any"):
             flights = flights.filter(Flight.depart_airport==form.source_city_airport.data)
         if (form.dest_city_airport.data != "any"):
-            flights = flights.filter(Flight.arrival_airport==form.source_city_airport.data)
+            flights = flights.filter(Flight.arrival_airport==form.dest_city_airport.data)
         if (form.gonna_filter_date.data and form.depart_date.data is not None):
             depart_date = form.depart_date.data
             next_day = depart_date + datetime.timedelta(days=1)
@@ -454,16 +454,34 @@ def spending_track():
                            month_labels=month_labels,
                            month_spendings=month_spendings)
 
-@app.route("/staffFlights", methods=["GET"])
+@app.route("/staffFlights", methods=["GET", "POST"])
 @login_required
 def staff_flights():
     if (current_user.get_user_type() == "Customer"):
         flash("You cannot see these flights!")
         return redirect(url_for("home"))
 
-    flights = Flight.query.filter(Flight.airline_name==current_user.airline_name).all()
+    form = StaffFlightFilterForm()
+    form.create_choices()
 
-    return render_template("staff_flights.html", flights=flights)
+    if (form.validate_on_submit()):
+        flights = Flight.query.filter(Flight.airline_name==current_user.airline_name)
+        
+        if (form.source_city_airport.data != "any"):
+            flights = flights.filter(Flight.depart_airport==form.source_city_airport.data)
+        if (form.dest_city_airport.data != "any"):
+            flights = flights.filter(Flight.arrival_airport==form.dest_city_airport.data)
+        
+        if (form.gonna_filter_date.data and form.start_date.data and form.end_date.data):
+            flights = flights.filter(Flight.depart_datetime>=to_datetime(form.start_date.data),
+                                     Flight.depart_datetime<=to_datetime(form.end_date.data))
+        
+    else:
+        flights = Flight.query.filter(Flight.airline_name==current_user.airline_name,
+                                      Flight.depart_datetime>=datetime.datetime.today(),
+                                      Flight.depart_datetime<=datetime.datetime.today() + datetime.timedelta(days=30))
+
+    return render_template("staff_flights.html", form=form, flights=flights.all())
 
 @app.route("/createFlight", methods=["GET", "POST"])
 @login_required
