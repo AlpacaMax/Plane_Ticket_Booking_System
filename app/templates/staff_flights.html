@@ -14,7 +14,8 @@
         </h2>
         <span>{{ flight.airline_name }} {{ flight.airplane_id }}</span><br>
         <span style="color:gray">{{ flight.status }}</span><br>
-        <a href="{{ url_for('change_status', flight_num=flight.flight_num, depart_datetime=flight.depart_datetime) }}">Change Status</a>
+        <a href="{{ url_for('change_status', flight_num=flight.flight_num, depart_datetime=flight.depart_datetime) }}">Change Status</a><br>
+        <a href="{{ url_for('view_comments', flight_num=flight.flight_num, depart_datetime=flight.depart_datetime) }}">View Rating and Comments</a>
     </div>
     <hr>
 {% endfor %}

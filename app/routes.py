@@ -794,3 +794,27 @@ def change_status():
     form.status.data = flight.status
     
     return render_template("change_status.html", form=form)
+
+@app.route("/viewComments", methods=["GET", "POST"])
+@login_required
+def view_comments():
+    if (current_user.get_user_type() == "Customer"):
+        flash("You cannot view all comments")
+        return redirect(url_for("home"))
+
+    flight_num = escape(request.args.get("flight_num"))
+    depart_datetime = datetime.datetime.fromisoformat(request.args.get("depart_datetime"))
+    airline_name = current_user.airline_name
+
+    flight = Flight.query.filter(Flight.flight_num == flight_num,
+                                 Flight.depart_datetime == depart_datetime,
+                                 Flight.airline_name == airline_name).first()
+
+    if (flight is None):
+        flash("Flight doesn't exist. Please choose a different flight")
+        return redirect(url_for("staff_flights"))
+
+    all_ratings = [ticket.rating for ticket in flight.tickets if ticket.rating != None]
+    avg_rating = sum(all_ratings)/len(all_ratings) if len(all_ratings) > 0 else 5.0
+
+    return render_template("view_comment.html", flight=flight, avg_rating=avg_rating)
