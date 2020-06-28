@@ -60,6 +60,10 @@ def home():
 
 @app.route("/returnTrip", methods=["GET"])
 def return_trip_choosing():
+    if (current_user.get_user_type() == "Staff"):
+        flash("You are not allowed to purchase flights")
+        return redirect(url_for("home"))
+
     depart_flight_num = escape(request.args.get("depart_flight_num"))
     depart_datetime = datetime.datetime.fromisoformat(request.args.get("depart_datetime"))
     depart_airline_name = escape(request.args.get("depart_airline_name"))
@@ -72,6 +76,18 @@ def return_trip_choosing():
 
     if (depart_flight is None):
         flash(f"Departure flight doesn't exist. Please choose an existing flight.")
+        return redirect(url_for("home"))
+    elif (depart_flight.get_num_tickets() == depart_flight.airplane.num_seat):
+        flash(f"This flight is full. Please choose a different flight.")
+        return redirect(url_for("home"))
+    
+    ticket = Ticket.query.filter(Ticket.flight_num==depart_flight_num,
+                                 Ticket.depart_datetime==depart_datetime,
+                                 Ticket.airline_name==depart_airline_name,
+                                 Ticket.customer_email==current_user.email).first()
+
+    if (ticket):
+        flash("You've already booked this flight. Choose a different one.")
         return redirect(url_for("home"))
 
     depart_city = Airport.query.filter(Airport.name == depart_flight.depart_airport).first().city
@@ -106,11 +122,24 @@ def view_selected_flights():
     depart_flight = Flight.query.filter(Flight.airline_name==depart_airline_name,
                                         Flight.depart_datetime==depart_datetime,
                                         Flight.flight_num==depart_flight_num).first()
+
+    if (depart_flight is None):
+        flash("Departure flight doesn't exist. Please choose an existing flight.")
+        return redirect(url_for("home"))
+    elif (depart_flight.get_num_tickets() == depart_flight.airplane.num_seat):
+        flash(f"This flight is full. Please choose a different flight.")
+        return redirect(url_for("home"))
+    
+    ticket = Ticket.query.filter(Ticket.flight_num==depart_flight_num,
+                                 Ticket.depart_datetime==depart_datetime,
+                                 Ticket.airline_name==depart_airline_name,
+                                 Ticket.customer_email==current_user.email).first()
+
+    if (ticket):
+        flash("You've already booked this flight. Choose a different one.")
+        return redirect(url_for("home"))
     
     form = PurchaseForm()
-    # form.depart_flight_num.data = depart_flight_num
-    # form.depart_datetime.data = depart_datetime
-    # form.depart_airline_name.data = depart_airline_name
 
     return_flight = None
     if ("return_airline_name" in request.args
@@ -126,7 +155,29 @@ def view_selected_flights():
                                             Flight.flight_num==return_flight_num).first()
 
         if (return_flight is None):
-            flash("Return flight doesn't exist! Please choose a different one")
+            flash("Return flight doesn't exist! Please choose an existing flight.")
+            return redirect(url_for(
+                "return_trip_choosing",
+                depart_airline_name = depart_airline_name,
+                depart_datetime = depart_datetime,
+                depart_flight_num = depart_flight_num
+            ))
+        elif (return_flight.get_num_tickets() == return_flight.airplane.num_seat):
+            flash(f"This flight is full. Please choose a different flight.")
+            return redirect(url_for(
+                "return_trip_choosing",
+                depart_airline_name = depart_airline_name,
+                depart_datetime = depart_datetime,
+                depart_flight_num = depart_flight_num
+            ))
+        
+        ticket = Ticket.query.filter(Ticket.flight_num==return_flight_num,
+                                    Ticket.depart_datetime==return_datetime,
+                                    Ticket.airline_name==return_airline_name,
+                                    Ticket.customer_email==current_user.email).first()
+
+        if (ticket):
+            flash("You've already booked this flight. Choose a different one.")
             return redirect(url_for(
                 "return_trip_choosing",
                 depart_airline_name = depart_airline_name,
@@ -134,9 +185,6 @@ def view_selected_flights():
                 depart_flight_num = depart_flight_num
             ))
     
-    # form.return_flight_num.data = return_flight_num
-    # form.return_datetime.data = return_datetime
-    # form.return_airline_name.data = return_airline_name
     if (form.validate_on_submit()):
         if (not current_user.is_authenticated):
             flash("Please login first!")
@@ -294,7 +342,7 @@ def customer_future_flights():
     all_tickets = Ticket.query.filter(
         Ticket.customer_email==current_user.email,
         Ticket.depart_datetime > datetime.datetime.now()
-    ).all()
+    ).order_by(Ticket.depart_datetime).all()
     flights = [ticket.flight for ticket in all_tickets]
 
     return render_template("customer_future_flights.html", flights=flights)

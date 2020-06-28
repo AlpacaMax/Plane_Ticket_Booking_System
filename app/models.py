@@ -84,7 +84,7 @@ class Flight(db.Model):
         if (self.get_num_tickets() / self.airplane.num_seat > 0.7):
             return round(self.base_price * 1.2, 2)
         else:
-            return self.base_price
+            return float(self.base_price)
 
 class Customer(db.Model, UserMixin):
     email = db.Column(db.String(120), primary_key=True)
