@@ -218,6 +218,9 @@ def view_selected_flights():
         elif (current_user.get_user_type() == "Staff"):
             flash("Only customers are allowed to book tickets")
             return redirect(url_for("home"))
+        elif (to_datetime(str(form.expire_date.data)) < datetime.datetime.today()):
+            flash("You card has expired. Please use a different card")
+            return redirect(request.url)
         
         depart_ticket_id = hashlib.md5(
             (depart_airline_name+str(depart_datetime)+depart_flight_num+current_user.get_id()).encode()
