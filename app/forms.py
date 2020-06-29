@@ -276,7 +276,7 @@ class StaffFlightFilterForm(FlaskForm):
     submit = SubmitField("Filter")
 
     def create_choices(self):
-        choices = [('any', 'Any')] + [(airport.name, airport.name) for airport in Airport.query.all()]
+        choices = [('any', 'Any')] + [(airport.name, "%s/%s" % (airport.city, airport.name)) for airport in Airport.query.all()]
         self.source_city_airport.choices = choices
         self.dest_city_airport.choices = choices
 

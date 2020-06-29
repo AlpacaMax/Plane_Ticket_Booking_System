@@ -554,9 +554,11 @@ def staff_flights():
                                      Flight.depart_datetime<=to_datetime(form.end_date.data))
         
     else:
+        today = datetime.datetime.today()
+        next_month = today + datetime.timedelta(days=30)
         flights = Flight.query.filter(Flight.airline_name==current_user.airline_name,
-                                      Flight.depart_datetime>=datetime.datetime.today(),
-                                      Flight.depart_datetime<=datetime.datetime.today() + datetime.timedelta(days=30))
+                                      Flight.depart_datetime>=today,
+                                      Flight.depart_datetime<=next_month)
 
     return render_template("staff_flights.html", form=form, flights=flights.all())
 
