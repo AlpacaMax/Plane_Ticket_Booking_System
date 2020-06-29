@@ -4,7 +4,7 @@ import datetime
 from flask import render_template, request, url_for, flash, redirect
 from markupsafe import escape
 from app.models import *
-from app import app, db, bcrypt
+from app import app, db
 from app.forms import FilterForm, LoginForm, CustomerRegisterForm, StaffRegisterForm, PurchaseForm, CommentForm, DateFilterForm, CreateFlightForm, to_datetime, AddAirplaneForm, AddAirportForm, AddPhoneNumberForm, ChangeStatusForm, StaffFlightFilterForm
 from sqlalchemy.orm import aliased
 from flask_login import login_user, current_user, logout_user, login_required
@@ -41,8 +41,7 @@ def home():
 
     airports = Airport.query.order_by(Airport.city).all()
     choices = [("any", "Any")]\
-              + [(airport.name, "%s/%s" % (airport.city, airport.name))
-                 for airport in airports]
+              + [(airport.name, "%s/%s" % (airport.city, airport.name)) for airport in airports]
 
     form.source_city_airport.choices = choices
     form.dest_city_airport.choices = choices
