@@ -14,6 +14,7 @@
     {% for flight in flights %}
         <div>
             <span style="font-weight:lighter">{{ flight.depart_datetime.strftime("%m/%d/%Y") }}</span><br>
+            <span>{{ flight.flight_num }}</span><br>
             <h2>
                 {{ flight.depart_airport }}
                 <small>{{ flight.depart_datetime.strftime("%H:%M") }}</small>

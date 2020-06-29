@@ -14,7 +14,7 @@ def filter_form_processor(form, flights):
         form.source_city_airport.data = "any"
         form.dest_city_airport.data = "any"
         flash(f"Cannot have same source airport and destination airport.")
-    
+
     if (form.gonna_filter_date.data and not form.is_future_depart_date()):
         form.depart_date.data = None
         flash(f"Departure date must at least be today.")
@@ -29,7 +29,7 @@ def filter_form_processor(form, flights):
             next_day = depart_date + datetime.timedelta(days=1)
             flights = flights.filter(Flight.depart_datetime >= depart_date)
             flights = flights.filter(Flight.depart_datetime < next_day)
-    
+
     return flights
 
 def date_to_datetime(a_date):
@@ -409,7 +409,8 @@ def flight_comment():
         Ticket.airline_name==airline_name,
         Ticket.depart_datetime==depart_datetime,
         Ticket.flight_num==flight_num,
-        Ticket.customer_email==current_user.get_id()
+        Ticket.customer_email==current_user.get_id(),
+        Ticket.depart_datetime<datetime.datetime.today()
     ).first()
 
     if (ticket is None):

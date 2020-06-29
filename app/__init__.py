@@ -7,6 +7,7 @@ app.config["SECRET_KEY"] = "f42228c3084eba5c057abdb77e7325d2"
 # mysqlConn = "mysql+mysqlconnector://root:root@localhost:8889/flask_ticket_booking"
 sqliteConn = 'sqlite:///site.db'
 app.config["SQLALCHEMY_DATABASE_URI"] = sqliteConn
+app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
