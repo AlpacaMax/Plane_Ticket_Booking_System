@@ -573,6 +573,11 @@ def create_flight():
     form.airline_name.data = current_user.airline_name
     form.create_airplane_choices(current_user.airline_name)
 
+    airports = Airport.query.all()
+    choices = [(airport.name, "%s/%s" % (airport.city, airport.name)) for airport in airports]
+    form.depart_airport.choices = choices
+    form.arrival_airport.choices = choices
+
     if (form.validate_on_submit()):
         new_flight = Flight(
             flight_num = form.flight_num.data,
